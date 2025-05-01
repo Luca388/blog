@@ -1,8 +1,9 @@
 ---
 layout: single
-categories: PS
-title: 
-tags:
+categories:
+  - PS
+title: "[백준]"
+tags: 
 date: <% tp.date.now("YYYY-MM-DD") %>
 ---
 
