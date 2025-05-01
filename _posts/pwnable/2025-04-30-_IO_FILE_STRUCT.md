@@ -1,4 +1,9 @@
-
+---
+layout: single
+categories: pwnable 
+title: _IO_FILE 파일 구조체
+tags: iofile
+---
 
 
 # _IO_FILE 파일 구조체
