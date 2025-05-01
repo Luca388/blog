@@ -2,7 +2,8 @@
 layout: single
 title: Oracle and SQL Server Auto Comiit
 categories: SQL
-tags: oracle
+tags:
+  - oracle
 ---
 # ORACLE
 DDL
