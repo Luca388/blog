@@ -1,6 +1,7 @@
 ---
 layout: single
-categories: webhacking
-title: '"[wargame] "'
+categories:
+  - webhacking
+title: "[wargame]"
 tags:
 ---

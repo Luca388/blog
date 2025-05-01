@@ -1,6 +1,7 @@
 ---
 layout: single
-categories: pwnable
-title: '"[wargame] "'
+categories:
+  - pwnable
+title: "[wargame]"
 tags:
 ---
