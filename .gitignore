@@ -1,5 +1,6 @@
 # Obsidian 설정 파일 무시
 .obsidian/
+./.obsidian/
 # Vim
 *~
 *.sw[p_]
