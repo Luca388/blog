@@ -61,5 +61,6 @@ tags: ["memory", "paging"]
 | `npm run dev` | 개발 서버 (http://localhost:4321/blog/) |
 | `npm run build` | `dist/`로 빌드 + Pagefind 검색 인덱스 생성 |
 | `npm run preview` | 빌드 결과 확인 (검색은 빌드 후에만 동작) |
+| `npm run sync` | `posts/` 변경 사항을 커밋 하나(메시지는 날짜)로 묶어서 push. VS Code에서는 Run Task → "블로그 올리기" |
 
 `main`에 push하면 GitHub Actions(`.github/workflows/deploy.yml`)가 빌드해서 배포해요.
