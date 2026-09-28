@@ -1,4 +1,5 @@
-// Keep in sync with posts/.vscode/tasks.json (used when VS Code is opened at posts/).
+// Same as ../../.vscode/tasks.json, for when VS Code is opened at posts/.
+// npm finds the root package.json and runs scripts from there.
 {
   "version": "2.0.0",
   "tasks": [

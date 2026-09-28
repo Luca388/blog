@@ -50,7 +50,7 @@ draft: true
 
 ## VS Code
 
-레포 폴더(`blog`)를 열어야 `.vscode/` 설정이 적용돼요. 붙여 넣은 이미지는 `posts/images/<글 이름>-image.png`로 저장되고 링크가 자동으로 들어가요.
+`blog` 또는 `posts` 폴더를 열면 `.vscode/` 설정이 적용돼요. 붙여 넣은 이미지는 `posts/images/<글 이름>-image.png`로 저장되고 링크가 자동으로 들어가요. 글을 지우면 그 글의 이미지는 다음 `npm run sync` 때 자동으로 지워져요.
 
 ## 명령어
 
@@ -60,6 +60,7 @@ draft: true
 | `npm run dev` | 개발 서버 (http://localhost:4321/blog/) |
 | `npm run build` | `dist/`로 빌드 + Pagefind 검색 인덱스 생성 |
 | `npm run preview` | 빌드 결과 확인 (검색은 빌드 후에만 동작) |
-| `npm run sync` | `posts/` 변경 사항을 커밋 하나(메시지는 날짜)로 묶어서 push. VS Code에서는 Run Task → "블로그 올리기" |
+| `npm run sync` | 안 쓰는 이미지 정리 → 빌드 확인 → `posts/` 변경 사항을 커밋 하나(메시지는 날짜)로 묶어서 push. VS Code에서는 Run Task → "블로그 올리기" |
+| `npm run clean-images` | 어떤 글에서도 쓰지 않는 `posts/images/` 이미지 삭제 (`-- --dry-run`이면 목록만 보여줌) |
 
 `main`에 push하면 GitHub Actions(`.github/workflows/deploy.yml`)가 빌드해서 배포해요.

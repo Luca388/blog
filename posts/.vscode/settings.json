@@ -1,4 +1,4 @@
-// Keep in sync with posts/.vscode/settings.json (used when VS Code is opened at posts/).
+// Same as ../../.vscode/settings.json, for when VS Code is opened at posts/.
 {
   // Pasted/dropped images go to posts/images/, named after the post
   // (e.g. posts/images/가상메모리-image.png). Destinations are relative to the post, so this

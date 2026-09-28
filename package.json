@@ -10,7 +10,8 @@
     "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
-    "sync": "sh scripts/sync.sh"
+    "sync": "sh scripts/sync.sh",
+    "clean-images": "node scripts/clean-images.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",

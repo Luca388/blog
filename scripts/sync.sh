@@ -4,6 +4,9 @@
 set -e
 cd "$(dirname "$0")/.."
 
+# Remove images that no post uses anymore (e.g. the post was deleted).
+node scripts/clean-images.mjs
+
 # Build first so a broken post (e.g. a missing image) never gets pushed.
 log="$(mktemp)"
 if ! npm run build >"$log" 2>&1; then
