@@ -82,7 +82,7 @@ export const tagKey = (tag: string) => tag.toLowerCase().replace(/\s+/g, '-');
 export const postUrl = (post: Post) => url(`/${post.data.slug}/`);
 
 /** Top-level paths used by other pages; a post with one of these slugs would be shadowed. */
-export const RESERVED_SLUGS = ['categories', 'tags', 'search', '404', 'rss.xml', 'pagefind', '_astro'];
+export const RESERVED_SLUGS = ['categories', 'tags', 'search', 'privacy', '404', 'rss.xml', 'pagefind', '_astro'];
 
 /** Published posts, newest first. */
 export async function getPosts() {

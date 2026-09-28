@@ -1,0 +1,37 @@
+---
+import { GITHUB_URL, SITE_TITLE } from '../consts';
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="개인정보처리방침">
+	<article class="prose">
+		<h1 class="page-title">개인정보처리방침</h1>
+		<p>{SITE_TITLE}(이하 "이 블로그")는 방문자의 개인정보를 직접 수집하거나 저장하지 않아요. 회원가입, 댓글, 문의 양식이 없어요.</p>
+
+		<h2>광고와 쿠키</h2>
+		<p>이 블로그는 Google AdSense 광고를 게재해요.</p>
+		<ul>
+			<li>Google을 비롯한 제3자 공급업체는 쿠키를 사용해 방문자가 이 블로그나 다른 웹사이트를 방문한 기록을 바탕으로 광고를 게재해요.</li>
+			<li>Google은 광고 쿠키를 사용해 방문자가 이 블로그 및 인터넷의 다른 사이트를 방문한 기록을 바탕으로 방문자와 사용자에게 광고를 게재할 수 있어요.</li>
+			<li>
+				방문자는 <a href="https://adssettings.google.com">Google 광고 설정</a>에서 맞춤 광고를 해제할 수 있고,
+				<a href="https://www.aboutads.info/choices/">www.aboutads.info</a>에서 제3자 공급업체의 맞춤 광고 쿠키를 해제할 수 있어요.
+			</li>
+			<li>
+				Google이 데이터를 사용하는 방식은
+				<a href="https://policies.google.com/technologies/partner-sites">Google 파트너 사이트 정책</a>에서 확인할 수 있어요.
+			</li>
+		</ul>
+
+		<h2>브라우저 저장소</h2>
+		<p>다크 모드 설정을 기억하려고 브라우저의 localStorage에 <code>theme</code> 값 하나를 저장해요. 이 값은 방문자의 브라우저에만 남고 어디에도 전송되지 않아요.</p>
+
+		<h2>호스팅</h2>
+		<p>이 블로그는 GitHub Pages로 호스팅돼요. GitHub는 보안과 운영을 위해 접속 기록(IP 주소 등)을 수집할 수 있어요. 자세한 내용은 <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub 개인정보 처리방침</a>을 참고하세요.</p>
+
+		<h2>문의</h2>
+		<p><a href={GITHUB_URL}>GitHub</a>를 통해 연락할 수 있어요.</p>
+
+		<p><small>시행일: 2026년 9월 28일</small></p>
+	</article>
+</Base>

@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { GITHUB_URL, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { ADSENSE_CLIENT, GITHUB_URL, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 import { url } from '../lib/posts';
 
 interface Props {
@@ -35,6 +35,19 @@ const nav = [
 		<meta property="og:title" content={fullTitle} />
 		<meta property="og:description" content={description} />
 		<meta property="og:url" content={canonical} />
+		{
+			ADSENSE_CLIENT && (
+				<>
+					<meta name="google-adsense-account" content={ADSENSE_CLIENT} />
+					<script
+						is:inline
+						async
+						src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+						crossorigin="anonymous"
+					></script>
+				</>
+			)
+		}
 		<script is:inline>
 			(() => {
 				let theme;
@@ -72,6 +85,7 @@ const nav = [
 			<span>© {new Date().getFullYear()} Luca</span>
 			<a href={GITHUB_URL}>GitHub</a>
 			<a href={url('/rss.xml')}>RSS</a>
+			<a href={url('/privacy/')}>개인정보처리방침</a>
 		</footer>
 		<script is:inline>
 			document.getElementById('theme-toggle').addEventListener('click', () => {
