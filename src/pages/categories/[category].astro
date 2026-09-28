@@ -1,0 +1,24 @@
+---
+import PostList from '../../components/PostList.astro';
+import Base from '../../layouts/Base.astro';
+import { getPosts, groupByCategory, type Post } from '../../lib/posts';
+
+export async function getStaticPaths() {
+	return groupByCategory(await getPosts()).map(([category, { label, posts }]) => ({
+		params: { category },
+		props: { label, posts },
+	}));
+}
+
+interface Props {
+	label: string;
+	posts: Post[];
+}
+
+const { label, posts } = Astro.props;
+---
+
+<Base title={label}>
+	<h1 class="page-title">{label} <small>{posts.length}</small></h1>
+	<PostList posts={posts} showCategory={false} />
+</Base>

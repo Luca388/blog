@@ -1,0 +1,21 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getPosts, groupByTag, url } from '../../lib/posts';
+
+const tags = groupByTag(await getPosts());
+---
+
+<Base title="태그">
+	<h1 class="page-title">태그</h1>
+	<ul class="term-grid">
+		{
+			tags.map(([key, { label, posts }]) => (
+				<li>
+					<a href={url(`/tags/${key}/`)}>
+						#{label} <small>{posts.length}</small>
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</Base>

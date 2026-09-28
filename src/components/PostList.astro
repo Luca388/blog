@@ -1,0 +1,38 @@
+---
+import { categoryKey, formatDate, postUrl, url, type Post } from '../lib/posts';
+
+interface Props {
+	posts: Post[];
+	/** Group entries under year headings. */
+	byYear?: boolean;
+	showCategory?: boolean;
+}
+
+const { posts, byYear = false, showCategory = true } = Astro.props;
+const groups = byYear
+	? Map.groupBy(posts, (p) => p.data.date.getFullYear())
+	: new Map([[null, posts]]);
+---
+
+{
+	[...groups].map(([year, items]) => (
+		<section class="post-group">
+			{year && <h2 class="year">{year}</h2>}
+			<ul class="post-list">
+				{items.map((post) => (
+					<li>
+						<time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+						<a class="post-link" href={postUrl(post)}>
+							{post.data.title}
+						</a>
+						{showCategory && (
+							<a class="chip" href={url(`/categories/${categoryKey(post.data.category)}/`)}>
+								{post.data.category}
+							</a>
+						)}
+					</li>
+				))}
+			</ul>
+		</section>
+	))
+}

@@ -1,0 +1,86 @@
+---
+import '../styles/global.css';
+import { GITHUB_URL, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { url } from '../lib/posts';
+
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const { title, description = SITE_DESCRIPTION } = Astro.props;
+const fullTitle = title ? `${title} - ${SITE_TITLE}` : SITE_TITLE;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const path = Astro.url.pathname;
+const nav = [
+	{ href: url('/'), label: '글' },
+	{ href: url('/categories/'), label: '카테고리' },
+	{ href: url('/tags/'), label: '태그' },
+	{ href: url('/search/'), label: '검색' },
+];
+---
+
+<!doctype html>
+<html lang="ko">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{fullTitle}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical} />
+		<link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
+		<link rel="alternate" type="application/rss+xml" title={SITE_TITLE} href={url('/rss.xml')} />
+		<link rel="sitemap" href={url('/sitemap-index.xml')} />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={fullTitle} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical} />
+		<script is:inline>
+			(() => {
+				let theme;
+				try {
+					theme = localStorage.getItem('theme');
+				} catch {}
+				theme ??= matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+				document.documentElement.dataset.theme = theme;
+			})();
+		</script>
+	</head>
+	<body>
+		<header class="site-header">
+			<div class="container header-inner">
+				<a class="site-title" href={url('/')}>{SITE_TITLE}</a>
+				<nav>
+					{
+						nav.map(({ href, label }) => (
+							<a
+								href={href}
+								aria-current={(href === url('/') ? path === href : path.startsWith(href)) ? 'page' : undefined}
+							>
+								{label}
+							</a>
+						))
+					}
+					<button id="theme-toggle" type="button" aria-label="다크 모드 전환">◐</button>
+				</nav>
+			</div>
+		</header>
+		<main class="container">
+			<slot />
+		</main>
+		<footer class="site-footer container">
+			<span>© {new Date().getFullYear()} Luca</span>
+			<a href={GITHUB_URL}>GitHub</a>
+			<a href={url('/rss.xml')}>RSS</a>
+		</footer>
+		<script is:inline>
+			document.getElementById('theme-toggle').addEventListener('click', () => {
+				const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+				document.documentElement.dataset.theme = next;
+				try {
+					localStorage.setItem('theme', next);
+				} catch {}
+			});
+		</script>
+	</body>
+</html>
