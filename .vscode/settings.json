@@ -1,8 +1,9 @@
 {
-  // Pasted/dropped images go to posts/images/ (a leading / means the workspace root),
-  // named after the post, e.g. posts/images/가상메모리-image.png
+  // Pasted/dropped images go to posts/images/, named after the post
+  // (e.g. posts/images/가상메모리-image.png). Destinations are relative to the post, so this
+  // works whichever folder VS Code was opened at.
   "markdown.copyFiles.destination": {
-    "posts/**/*.md": "/posts/images/${documentBaseName}-${fileName}"
+    "**/posts/*/*.md": "../images/${documentBaseName}-${fileName}"
   },
   "markdown.copyFiles.overwriteBehavior": "nameIncrementally",
   "[markdown]": {

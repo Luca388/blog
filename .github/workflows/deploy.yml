@@ -3,8 +3,6 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-    # auto-saved drafts don't change the site
-    paths-ignore: ['posts/drafts/**']
   workflow_dispatch:
 
 permissions:

@@ -4,10 +4,9 @@ import { z } from 'astro/zod';
 
 const posts = defineCollection({
 	// Keep the path (<category>/<slug>) as the id so Korean slugs survive as-is.
-	// Anything under posts/drafts/ is a work in progress and never published.
 	loader: glob({
 		base: './posts',
-		pattern: ['**/*.md', '!drafts/**'],
+		pattern: '**/*.md',
 		generateId: ({ entry }) => entry.replace(/\.md$/, ''),
 	}),
 	// Everything is optional: title, date and category are inferred in src/lib/posts.ts.

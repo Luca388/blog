@@ -19,25 +19,19 @@ export type Post = Omit<Entry, 'data'> & {
 export const leadingTitle = (body: string) => body.trimStart().match(/^#[ \t]+([^\n]+?)[ \t#]*(?:\n|$)/)?.[1];
 
 /**
- * Date of the oldest commit in which this file (following renames) sat outside posts/drafts/,
- * i.e. when it was published. Later moves between folders or renames keep that date.
+ * Date of the first commit of this file, following renames, i.e. when it was published.
+ * Later moves between folders or renames keep that date.
  * Needs full history in CI (`fetch-depth: 0`).
  */
 const publishedAtCache = new Map<string, Date | undefined>();
 function publishedAt(filePath: string) {
 	if (publishedAtCache.has(filePath)) return publishedAtCache.get(filePath);
-	const log = execFileSync(
-		'git',
-		['log', '--follow', '--name-status', '--format=%x00%aI', '--', filePath],
-		{ encoding: 'utf8' },
-	);
-	let date: Date | undefined;
-	// newest first: each chunk is "<date>\n\n<status>\t[old\t]<path>"
-	for (const chunk of log.split('\0').slice(1)) {
-		const [iso, ...rest] = chunk.trim().split('\n');
-		const path = rest.filter(Boolean).at(-1)?.split('\t').at(-1) ?? '';
-		if (!path.includes('posts/drafts/')) date = new Date(iso);
-	}
+	const log = execFileSync('git', ['log', '--follow', '--format=%aI', '--', filePath], {
+		encoding: 'utf8',
+	}).trim();
+	// newest first, so the last line is the first commit
+	const first = log.split('\n').at(-1);
+	const date = first ? new Date(first) : undefined;
 	publishedAtCache.set(filePath, date);
 	return date;
 }
@@ -45,7 +39,7 @@ function publishedAt(filePath: string) {
 /**
  * Front matter is optional. Missing values come from the file itself:
  * - category: folder name (`posts/OS/...`)
- * - date: filename prefix (`2026-09-25-...`), else when it was first committed outside drafts/,
+ * - date: filename prefix (`2026-09-25-...`), else when it was first committed,
  *   else today for a post that isn't committed yet
  * - title: leading `# heading`, otherwise the filename
  */
