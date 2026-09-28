@@ -19,29 +19,34 @@ export type Post = Omit<Entry, 'data'> & {
 export const leadingTitle = (body: string) => body.trimStart().match(/^#[ \t]+([^\n]+?)[ \t#]*(?:\n|$)/)?.[1];
 
 /**
- * Date of the commit that added this file at its current path. `--no-renames` makes a move
- * out of drafts/ count as the add, so the date is when the post was published.
+ * Date of the oldest commit in which this file (following renames) sat outside posts/drafts/,
+ * i.e. when it was published. Later moves between folders or renames keep that date.
  * Needs full history in CI (`fetch-depth: 0`).
  */
-const addedAtCache = new Map<string, Date | undefined>();
-function addedAt(filePath: string) {
-	if (addedAtCache.has(filePath)) return addedAtCache.get(filePath);
-	const out = execFileSync(
+const publishedAtCache = new Map<string, Date | undefined>();
+function publishedAt(filePath: string) {
+	if (publishedAtCache.has(filePath)) return publishedAtCache.get(filePath);
+	const log = execFileSync(
 		'git',
-		['log', '--no-renames', '--diff-filter=A', '--format=%aI', '--', filePath],
+		['log', '--follow', '--name-status', '--format=%x00%aI', '--', filePath],
 		{ encoding: 'utf8' },
-	).trim();
-	const first = out.split('\n').at(-1);
-	const date = first ? new Date(first) : undefined;
-	addedAtCache.set(filePath, date);
+	);
+	let date: Date | undefined;
+	// newest first: each chunk is "<date>\n\n<status>\t[old\t]<path>"
+	for (const chunk of log.split('\0').slice(1)) {
+		const [iso, ...rest] = chunk.trim().split('\n');
+		const path = rest.filter(Boolean).at(-1)?.split('\t').at(-1) ?? '';
+		if (!path.includes('posts/drafts/')) date = new Date(iso);
+	}
+	publishedAtCache.set(filePath, date);
 	return date;
 }
 
 /**
  * Front matter is optional. Missing values come from the file itself:
  * - category: folder name (`posts/OS/...`)
- * - date: filename prefix (`2026-09-25-...`), else the commit that first added the file at
- *   this path (i.e. when it left drafts/), else today for a post that isn't committed yet
+ * - date: filename prefix (`2026-09-25-...`), else when it was first committed outside drafts/,
+ *   else today for a post that isn't committed yet
  * - title: leading `# heading`, otherwise the filename
  */
 function resolve(entry: Entry): Post {
@@ -52,7 +57,7 @@ function resolve(entry: Entry): Post {
 	const slug = rest!.trim().replace(/\s+/g, '-');
 
 	const date =
-		entry.data.date ?? (fileDate ? new Date(fileDate) : (addedAt(entry.filePath!) ?? new Date()));
+		entry.data.date ?? (fileDate ? new Date(fileDate) : (publishedAt(entry.filePath!) ?? new Date()));
 	const category = entry.data.category ?? folder;
 	if (!category) throw new Error(`${entry.filePath}: 카테고리 폴더 안에 넣거나 category를 적어주세요`);
 
@@ -69,12 +74,15 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 /** Prefix a site-relative path with the configured base (`/blog`). */
 export const url = (path: string) => `${base}${path}`;
 
-/** Lowercased category and tag keys match the old Jekyll URLs (/blog/:category/:title/). */
+/** URL keys for category and tag pages. */
 export const categoryKey = (category: string) => category.toLowerCase();
 export const tagKey = (tag: string) => tag.toLowerCase().replace(/\s+/g, '-');
 
-export const postUrl = (post: Post) =>
-	url(`/${categoryKey(post.data.category)}/${post.data.slug}/`);
+/** Posts live at /blog/<slug>/, independent of their folder, so regrouping never breaks links. */
+export const postUrl = (post: Post) => url(`/${post.data.slug}/`);
+
+/** Top-level paths used by other pages; a post with one of these slugs would be shadowed. */
+export const RESERVED_SLUGS = ['categories', 'tags', 'search', '404', 'rss.xml', 'pagefind', '_astro'];
 
 /** Published posts, newest first. */
 export async function getPosts() {

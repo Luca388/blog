@@ -1,0 +1,11 @@
+{
+  // Pasted/dropped images go to posts/images/ (a leading / means the workspace root),
+  // named after the post, e.g. posts/images/가상메모리-image.png
+  "markdown.copyFiles.destination": {
+    "posts/**/*.md": "/posts/images/${documentBaseName}-${fileName}"
+  },
+  "markdown.copyFiles.overwriteBehavior": "nameIncrementally",
+  "[markdown]": {
+    "editor.wordWrap": "on"
+  }
+}
