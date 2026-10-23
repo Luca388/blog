@@ -10,7 +10,7 @@ export type Post = Omit<Entry, 'data'> & {
 		date: Date;
 		category: string;
 		slug: string;
-		/** The title came from the body's leading `# heading`, so the post page hides that heading. */
+		/** The body's leading `# heading` is the title, so the post page hides that heading. */
 		titleFromBody: boolean;
 	};
 };
@@ -55,11 +55,14 @@ function resolve(entry: Entry): Post {
 	const category = entry.data.category ?? folder;
 	if (!category) throw new Error(`${entry.filePath}: 카테고리 폴더 안에 넣거나 category를 적어주세요`);
 
-	const heading = entry.data.title ? undefined : leadingTitle(entry.body ?? '');
-	const title = entry.data.title ?? heading ?? rest!.trim();
+	// `||`, not `??`: the web editor can leave an empty title.
+	const heading = leadingTitle(entry.body ?? '');
+	const title = entry.data.title || heading || rest!.trim();
+	// Hide the leading heading when it is the title, so the title isn't shown twice.
+	const titleFromBody = heading !== undefined && heading.trim() === title.trim();
 	return {
 		...entry,
-		data: { ...entry.data, title, date, category, slug, titleFromBody: heading !== undefined },
+		data: { ...entry.data, title, date, category, slug, titleFromBody },
 	};
 }
 

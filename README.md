@@ -48,6 +48,17 @@ draft: true
 ---
 ```
 
+## 웹에서 쓰기
+
+https://luca388.github.io/blog/admin/ 에서 브라우저로 글을 쓰고 고칠 수 있어요 ([Sveltia CMS](https://sveltiacms.app), 설정은 `public/admin/config.yml`).
+
+- **로그인**: "액세스 토큰으로 로그인"에 GitHub 토큰을 붙여 넣어요. 토큰은 [여기](https://github.com/settings/personal-access-tokens/new)에서 만들어요: Repository access → Only select repositories → `blog`, Permissions → Contents: Read and write. 토큰은 그 브라우저에만 저장되니 공용 PC에서는 다 쓰고 로그아웃하세요.
+- **누가 쓸 수 있나**: 저장은 곧 이 레포에 커밋이라, 레포 쓰기 권한이 있는 사람만 돼요.
+- **저장하면**: `posts/<카테고리>/<날짜>-<제목>.md`로 `main`에 바로 커밋되고 1분쯤 뒤 사이트에 반영돼요. 이미지는 `posts/images/`에 올라가요.
+- 제목 칸을 비워 두면 본문 첫 줄의 `# 제목`을 써요. "임시 저장"을 켜면 `draft: true`가 돼요.
+- 로컬과 같이 써도 돼요. `npm run sync`가 웹에서 쓴 글을 받아 와서 합쳐요. 같은 글을 양쪽에서 고치면 충돌할 수 있으니 한쪽에서만 고치세요.
+- 카테고리 폴더를 추가하면 `config.yml`의 `collections`에도 추가해야 웹에서 보여요.
+
 ## VS Code
 
 `blog` 또는 `posts` 폴더를 열면 `.vscode/` 설정이 적용돼요. 붙여 넣은 이미지는 `posts/images/<글 이름>-image.png`로 저장되고 링크가 자동으로 들어가요. 글을 지우면 그 글의 이미지는 다음 `npm run sync` 때 자동으로 지워져요.

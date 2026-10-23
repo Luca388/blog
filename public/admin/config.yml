@@ -1,0 +1,67 @@
+# Web editor at /blog/admin/ (Sveltia CMS). Saving commits to main, which deploys the site.
+# Sign in with a GitHub token that can write to this repo; nobody else can save.
+backend:
+  name: github
+  repo: Luca388/blog
+  branch: main
+  commit_messages:
+    create: "{{slug}} 추가"
+    update: "{{slug}} 수정"
+    delete: "{{slug}} 삭제"
+    uploadMedia: "{{path}} 업로드"
+    deleteMedia: "{{path}} 삭제"
+
+locale: ko
+
+# Images go to posts/images/. The links posts use (../images/<file>, same as images pasted in
+# VS Code/Obsidian) are set per collection, since relative paths are only allowed there.
+media_folder: /posts/images
+media_libraries:
+  default:
+    config:
+      slugify_filename: true
+
+# Keep Korean in file names; the URL is the file name without the date (see src/lib/posts.ts).
+slug:
+  encoding: unicode
+  clean_accents: false
+  sanitize_replacement: "-"
+  lowercase: false
+
+output:
+  # An empty title would otherwise be saved as `title: ""`.
+  omit_empty_optional_fields: true
+
+# One collection per category folder. Keep in sync with the folders in posts/.
+collections:
+  - name: cs
+    label: CS
+    folder: posts/CS
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    summary: "{{title}}"
+    media_folder: ../images
+    public_folder: ../images
+    fields: &fields
+      - name: title
+        label: 제목
+        widget: string
+        required: false
+        hint: 비워 두면 본문 첫 줄의 `# 제목`을 써요. 파일명(주소)은 처음 저장할 때 제목으로 정해져요.
+      - name: tags
+        label: 태그
+        widget: list
+        required: false
+      - name: draft
+        label: 임시 저장 (사이트에 안 보임)
+        widget: boolean
+        required: false
+        default: false
+      - name: body
+        label: 본문
+        widget: markdown
+  - { name: db, label: DB, folder: posts/DB, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
+  - { name: security, label: Security, folder: posts/Security, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
+  - { name: language, label: Language, folder: posts/Language, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
+  - { name: math, label: Math, folder: posts/Math, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
+  - { name: algorithm, label: Algorithm, folder: posts/Algorithm, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
