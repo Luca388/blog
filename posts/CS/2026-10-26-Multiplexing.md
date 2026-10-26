@@ -68,3 +68,21 @@ draft: true
 - Frame duration = 1/50,000 = **20 μs**
 - Slot duration = 20/4 = **5 μs**
 - 출력 Bit rate = 50,000 × 8 = **400 kbps**
+
+#### Synchronizing (동기화 비트)
+
+- MUX와 DEMUX 간 프레임 경계를 구별하기 위해 **Framing Bit(동기화 비트)** 사용.
+- 일반적으로 각 Frame의 시작에 1bit 추가.
+- 동기화 비트는 0과 1을 번갈아 사용하는 방식이 대표적.
+
+**Example 8 — 동기화 비트 추가**
+
+4개 채널이 각각 250 characters/s로 데이터를 전송하고, Frame마다 동기화 비트 1개를 추가하는 경우.
+
+- 1 character = 8 bits
+- 입력 Bit rate = 250 × 8 = **2 kbps**
+- Character duration = 1/250 = **4 ms**
+- Frame rate = **250 frames/s**
+- Frame duration = **4 ms**
+- Frame 크기 = (4 × 8) + 1 = **33 bits**
+- 출력 Bit rate = 250 × 33 = **8,250 bps**
