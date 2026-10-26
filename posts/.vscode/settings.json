@@ -8,6 +8,8 @@
   },
   "markdown.copyFiles.overwriteBehavior": "nameIncrementally",
   "[markdown]": {
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "on",
+    // Type a template prefix (lecture, concept, ps) and press Tab; see blog.code-snippets
+    "editor.tabCompletion": "onlySnippets"
   }
 }
