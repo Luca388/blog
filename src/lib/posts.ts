@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { CATEGORIES } from '../consts';
 
 type Entry = CollectionEntry<'posts'>;
 
@@ -52,7 +53,7 @@ function resolve(entry: Entry): Post {
 
 	const date =
 		entry.data.date ?? (fileDate ? new Date(fileDate) : (publishedAt(entry.filePath!) ?? new Date()));
-	const category = entry.data.category ?? folder;
+	const category = entry.data.category ?? (folder && (CATEGORIES[folder] ?? folder));
 	if (!category) throw new Error(`${entry.filePath}: 카테고리 폴더 안에 넣거나 category를 적어주세요`);
 
 	// `||`, not `??`: the web editor can leave an empty title.
@@ -72,7 +73,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 export const url = (path: string) => `${base}${path}`;
 
 /** URL keys for category and tag pages. */
-export const categoryKey = (category: string) => category.toLowerCase();
+export const categoryKey = (category: string) => category.toLowerCase().replace(/[\s/]+/g, '-');
 export const tagKey = (tag: string) => tag.toLowerCase().replace(/\s+/g, '-');
 
 /** Posts live at /blog/<slug>/, independent of their folder, so regrouping never breaks links. */
@@ -104,8 +105,15 @@ export function groupBy(
 	return [...groups.entries()].sort((a, b) => b[1].posts.length - a[1].posts.length);
 }
 
-export const groupByCategory = (posts: Post[]) =>
-	groupBy(posts, (p) => [p.data.category], categoryKey);
+/** Every category in CATEGORIES order (empty ones included), then any others by post count. */
+export function groupByCategory(posts: Post[]) {
+	const groups = new Map(groupBy(posts, (p) => [p.data.category], categoryKey));
+	const listed = Object.values(CATEGORIES).map(
+		(label) => [categoryKey(label), groups.get(categoryKey(label)) ?? { label, posts: [] }] as const,
+	);
+	const listedKeys = new Set(listed.map(([key]) => key));
+	return [...listed, ...[...groups].filter(([key]) => !listedKeys.has(key))];
+}
 export const groupByTag = (posts: Post[]) => groupBy(posts, (p) => p.data.tags, tagKey);
 
 export const formatDate = (date: Date) =>

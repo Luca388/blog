@@ -20,5 +20,5 @@ const { label, posts } = Astro.props;
 
 <Base title={label}>
 	<h1 class="page-title">{label} <small>{posts.length}</small></h1>
-	<PostList posts={posts} showCategory={false} />
+	{posts.length ? <PostList posts={posts} showCategory={false} /> : <p>아직 글이 없어요.</p>}
 </Base>

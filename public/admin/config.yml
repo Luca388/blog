@@ -32,7 +32,8 @@ output:
   # An empty title would otherwise be saved as `title: ""`.
   omit_empty_optional_fields: true
 
-# One collection per category folder. Keep in sync with the folders in posts/.
+# One collection per category folder. Keep in sync with CATEGORIES in src/consts.ts.
+# CS comes first because it defines the shared fields (&fields); the sidebar order follows this list.
 collections:
   - name: cs
     label: CS
@@ -65,3 +66,9 @@ collections:
   - { name: language, label: Language, folder: posts/Language, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
   - { name: math, label: Math, folder: posts/Math, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
   - { name: algorithm, label: Algorithm, folder: posts/Algorithm, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
+  - { name: dev, label: "개발", folder: "posts/개발", create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
+  - { name: ctf, label: "CTF/Wargame", folder: "posts/CTF-Wargame", create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
+  - { name: bugbounty, label: "Bug Bounty", folder: "posts/BugBounty", create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
+  - { name: docs, label: "블로그/기술문서", folder: "posts/블로그-기술문서", create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
+  - { name: papers, label: "논문/컨퍼런스", folder: "posts/논문-컨퍼런스", create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
+  - { name: contests, label: "공모전/자격증", folder: "posts/공모전-자격증", create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
