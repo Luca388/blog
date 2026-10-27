@@ -2,7 +2,7 @@
 title: Multiplexing
 tags:
   - 데이터통신
-draft: true
+draft: false
 ---
 
 ## Multiplexing
