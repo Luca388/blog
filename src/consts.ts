@@ -1,6 +1,8 @@
 export const SITE_TITLE = "Luca's development diary";
-export const SITE_DESCRIPTION = 'CS, 시스템 해킹, 리버싱을 공부하며 정리한 기록';
+export const SITE_DESCRIPTION = '개발과 보안을 공부하며 배운 것들을 차곡차곡 정리하는 기록';
 export const GITHUB_URL = 'https://github.com/Luca388';
+/** Name on the home page profile; the photo is the GitHub profile picture. */
+export const AUTHOR = 'Luca';
 
 /**
  * Categories in display order: folder under posts/ → name shown on the site.

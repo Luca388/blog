@@ -1,12 +1,55 @@
 ---
-import PostList from '../components/PostList.astro';
 import Base from '../layouts/Base.astro';
-import { getPosts } from '../lib/posts';
+import { AUTHOR, GITHUB_URL, SITE_DESCRIPTION } from '../consts';
+import { categoryKey, excerpt, formatDate, getPosts, groupByCategory, postUrl, url } from '../lib/posts';
 
 const posts = await getPosts();
+const recent = posts.slice(0, 6);
+const categories = groupByCategory(posts);
 ---
 
 <Base>
-	<h1 class="page-title">전체 글 <small>{posts.length}</small></h1>
-	<PostList posts={posts} byYear />
+	<section class="hero">
+		<img class="avatar" src={`${GITHUB_URL}.png?size=192`} alt="" width="96" height="96" />
+		<div>
+			<h1>{AUTHOR}</h1>
+			<p>{SITE_DESCRIPTION}</p>
+			<div class="hero-links">
+				<a href={GITHUB_URL}>GitHub</a>
+				<a href={url('/rss.xml')}>RSS</a>
+			</div>
+		</div>
+	</section>
+
+	<nav class="category-bar" aria-label="카테고리">
+		{
+			categories.map(([key, { label, posts }]) => (
+				<a class:list={['chip', { empty: !posts.length }]} href={url(`/categories/${key}/`)}>
+					{label} <small>{posts.length}</small>
+				</a>
+			))
+		}
+	</nav>
+
+	<h2 class="section-title">최근 글</h2>
+	<ul class="card-grid">
+		{
+			recent.map((post) => (
+				<li class="card">
+					<a class="chip" href={url(`/categories/${categoryKey(post.data.category)}/`)}>
+						{post.data.category}
+					</a>
+					<h3>
+						<a href={postUrl(post)}>{post.data.title}</a>
+					</h3>
+					<p>{excerpt(post)}</p>
+					<div class="card-meta">
+						<time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+						{post.data.tags.slice(0, 3).map((tag) => <span>#{tag}</span>)}
+					</div>
+				</li>
+			))
+		}
+	</ul>
+	<a class="more" href={url('/posts/')}>전체 글 {posts.length}개 보기 →</a>
 </Base>

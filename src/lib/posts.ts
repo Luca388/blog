@@ -80,7 +80,35 @@ export const tagKey = (tag: string) => tag.toLowerCase().replace(/\s+/g, '-');
 export const postUrl = (post: Post) => url(`/${post.data.slug}/`);
 
 /** Top-level paths used by other pages; a post with one of these slugs would be shadowed. */
-export const RESERVED_SLUGS = ['categories', 'tags', 'search', 'privacy', '404', 'rss.xml', 'pagefind', '_astro'];
+export const RESERVED_SLUGS = [
+	'posts',
+	'categories',
+	'tags',
+	'search',
+	'privacy',
+	'admin',
+	'404',
+	'rss.xml',
+	'pagefind',
+	'_astro',
+];
+
+/** The start of the body as plain text, for previews. */
+export function excerpt(post: Post, length = 120) {
+	let text = post.body ?? '';
+	if (post.data.titleFromBody) text = text.trimStart().replace(/^#[^\n]*\n?/, '');
+	text = text
+		.replace(/```[\s\S]*?```/g, ' ') // code blocks
+		.replace(/<[^>]+>/g, ' ') // html
+		.replace(/!\[[^\]]*\]\([^)]*\)/g, ' ') // images
+		.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // links keep their text
+		.replace(/^\s{0,3}(?:#{1,6}|>|[-*+]|\d+\.)\s+/gm, '') // headings, quotes, list markers
+		.replace(/[-=]{3,}/g, ' ') // rules, table separators
+		.replace(/[`*_~|]/g, '')
+		.replace(/\s+/g, ' ')
+		.trim();
+	return text.length > length ? `${text.slice(0, length).trimEnd()}…` : text;
+}
 
 /** Published posts, newest first. */
 export async function getPosts() {
