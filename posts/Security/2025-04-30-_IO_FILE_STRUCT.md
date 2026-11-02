@@ -1,5 +1,5 @@
 ---
-tags: ["pwnable", "iofile"]
+tags: ["pwnable", "iofile", "linux"]
 ---
 
 # _IO_FILE 파일 구조체

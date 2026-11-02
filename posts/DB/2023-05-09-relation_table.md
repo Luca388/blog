@@ -1,6 +1,6 @@
 ---
 title: "relation 과 table"
-tags: ["DB", "relation"]
+tags: ["DB", "relation", "modeling"]
 ---
 
 # reference 

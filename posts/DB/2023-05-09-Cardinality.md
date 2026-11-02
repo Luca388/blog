@@ -1,6 +1,6 @@
 ---
 title: "Cardinality 란?"
-tags: ["DB", "database"]
+tags: ["DB", "database", "modeling"]
 ---
 
 # Cardinality

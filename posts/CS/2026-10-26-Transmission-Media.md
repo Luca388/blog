@@ -2,6 +2,7 @@
 title: "Transmission\vMedia"
 tags:
   - 데이터통신
+  - school
 draft: true
 ---
 
