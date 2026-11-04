@@ -2,7 +2,7 @@
 title: "Circuit Switching\vand\vTelephone Network"
 tags:
   - 데이터통신
-draft: true
+draft: false
 ---
 
 	Space-Division Switch
