@@ -2,7 +2,7 @@
 title: Process control
 tags:
   - linux
-draft: true
+draft: false
 ---
 
 fork() 함수
