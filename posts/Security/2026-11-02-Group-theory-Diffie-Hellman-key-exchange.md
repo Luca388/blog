@@ -29,7 +29,7 @@ Diffie-Hellman
 
 Alice : small a 뽑고 large A 구해서 bob 에게 던져줌 
 
-bob : small b 뽑고 large B 구 ㅐㅎ서 bob 에게 던져줌
+bob : small b 뽑고 large B 구해서 bob 에게 던져줌
 
 alice : (a,B)  , bob : (b,A) 
 
@@ -37,4 +37,16 @@ alice : (a,B)  , bob : (b,A)
 
 (DH assumption)
 
+> (공식)
+
 (DLOG assumption)
+
+> (공식)
+
+Diffie hellman 이만족할라면 dh, dlog 문제가 만족해야함 
+
+- dlog/cdh/ddh
+
+cdh가 ddh 보다 더 어려움 
+
+DDH <= CDH <= DLOG 어려움순
