@@ -2,7 +2,7 @@
 title: Group theory, Diffie-Hellman key exchange
 tags:
   - 암호학
-draft: true
+draft: false
 ---
 
 Ek ( 공개 ) 
@@ -34,3 +34,7 @@ bob : small b 뽑고 large B 구 ㅐㅎ서 bob 에게 던져줌
 alice : (a,B)  , bob : (b,A) 
 
 ![](../images/20261102-122209.png)
+
+(DH assumption)
+
+(DLOG assumption)
