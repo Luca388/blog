@@ -74,12 +74,12 @@ const grids = years.map(yearGrid);
 	</div>
 	{
 		grids.map((g, i) => (
-			<div class="heatmap-year" data-year={g.year} hidden={i !== 0}>
+			<div class="heatmap-year" data-year={g.year} hidden={i !== 0} style={`--weeks: ${g.weeks.length}`}>
 				<p class="heatmap-summary">
 					{g.year}년에 <strong>{g.total}개</strong>의 글, <strong>{g.activeDays}일</strong> 기록했어요
 				</p>
 				<div class="heatmap-scroll">
-					<div class="heatmap-months" style={`grid-template-columns: repeat(${g.weeks.length}, var(--cell))`}>
+					<div class="heatmap-months">
 						{g.months.map((m) => (
 							<span style={`grid-column: ${m.col}`}>{m.label}</span>
 						))}
