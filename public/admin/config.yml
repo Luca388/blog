@@ -44,21 +44,25 @@ collections:
     media_folder: ../images
     public_folder: ../images
     fields: &fields
-      - name: title
+      - &f_title
+        name: title
         label: 제목
         widget: string
         required: false
         hint: 비워 두면 본문 첫 줄의 `# 제목`을 써요. 파일명(주소)은 처음 저장할 때 제목으로 정해져요.
-      - name: tags
+      - &f_tags
+        name: tags
         label: 태그
         widget: list
         required: false
-      - name: draft
+      - &f_draft
+        name: draft
         label: 임시 저장 (사이트에 안 보임)
         widget: boolean
         required: false
         default: false
-      - name: body
+      - &f_body
+        name: body
         label: 본문
         widget: markdown
   - { name: db, label: DB, folder: posts/DB, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
@@ -66,9 +70,133 @@ collections:
   - { name: language, label: Language, folder: posts/Language, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
   - { name: math, label: Math, folder: posts/Math, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
   - { name: algorithm, label: Algorithm, folder: posts/Algorithm, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
-  - { name: dev, label: "개발", folder: "posts/개발", create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
-  - { name: ctf, label: "CTF/Wargame", folder: "posts/CTF-Wargame", create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
-  - { name: bugbounty, label: "Bug Bounty", folder: "posts/BugBounty", create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
-  - { name: docs, label: "블로그/기술문서", folder: "posts/블로그-기술문서", create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
-  - { name: papers, label: "논문/컨퍼런스", folder: "posts/논문-컨퍼런스", create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
-  - { name: contests, label: "공모전/자격증", folder: "posts/공모전-자격증", create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
+  - name: dev
+    label: "개발"
+    folder: "posts/개발"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    summary: "{{title}}"
+    media_folder: ../images
+    public_folder: ../images
+    fields:
+      - *f_title
+      - *f_tags
+      - *f_draft
+      - name: project
+        label: "프로젝트 정보 (글 위에 요약 박스로 표시)"
+        widget: object
+        required: false
+        collapsed: true
+        fields:
+          - { name: repo, label: "저장소 URL", widget: string, required: false }
+          - { name: demo, label: "데모 URL", widget: string, required: false }
+          - { name: stack, label: "기술 스택", widget: list, required: false }
+          - { name: period, label: "기간", widget: string, required: false, hint: "예: 2026.09 ~ 2026.10" }
+      - *f_body
+  - name: ctf
+    label: "CTF/Wargame"
+    folder: "posts/CTF-Wargame"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    summary: "{{title}}"
+    media_folder: ../images
+    public_folder: ../images
+    fields:
+      - *f_title
+      - *f_tags
+      - *f_draft
+      - name: ctf
+        label: "문제 정보 (글 위에 요약 박스로 표시)"
+        widget: object
+        required: false
+        collapsed: true
+        fields:
+          - { name: platform, label: "플랫폼", widget: string, required: false, hint: "Dreamhack 등" }
+          - { name: event, label: "대회 이름", widget: string, required: false, hint: "CTF 대회일 때" }
+          - { name: field, label: "분야", widget: select, required: false, options: [pwn, rev, web, crypto, forensics, misc] }
+          - { name: difficulty, label: "난이도", widget: string, required: false }
+          - { name: solved, label: "푼 날짜", widget: datetime, required: false, time_format: false, format: "YYYY-MM-DD" }
+          - { name: link, label: "문제 링크", widget: string, required: false }
+      - *f_body
+  - name: bugbounty
+    label: "Bug Bounty"
+    folder: "posts/BugBounty"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    summary: "{{title}}"
+    media_folder: ../images
+    public_folder: ../images
+    fields:
+      - *f_title
+      - *f_tags
+      - *f_draft
+      - name: bugbounty
+        label: "제보 정보 (글 위에 요약 박스로 표시)"
+        widget: object
+        required: false
+        collapsed: true
+        fields:
+          - { name: target, label: "대상", widget: string, required: false }
+          - { name: platform, label: "플랫폼", widget: string, required: false }
+          - { name: type, label: "취약점 유형", widget: string, required: false, hint: "XSS, IDOR 등" }
+          - { name: severity, label: "심각도", widget: select, required: false, options: [Critical, High, Medium, Low, Info] }
+          - { name: status, label: "상태", widget: select, required: false, options: [제보, 확인, 패치, 공개] }
+          - { name: reported, label: "제보일", widget: datetime, required: false, time_format: false, format: "YYYY-MM-DD" }
+          - { name: link, label: "공개 리포트 / CVE 링크", widget: string, required: false }
+      - *f_body
+  - name: docs
+    label: "블로그/기술문서"
+    folder: "posts/블로그-기술문서"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    summary: "{{title}}"
+    media_folder: ../images
+    public_folder: ../images
+    fields: *fields
+  - name: papers
+    label: "논문/컨퍼런스"
+    folder: "posts/논문-컨퍼런스"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    summary: "{{title}}"
+    media_folder: ../images
+    public_folder: ../images
+    fields:
+      - *f_title
+      - *f_tags
+      - *f_draft
+      - name: paper
+        label: "논문/발표 정보 (글 위에 요약 박스로 표시)"
+        widget: object
+        required: false
+        collapsed: true
+        fields:
+          - { name: kind, label: "종류", widget: select, required: false, options: [논문, 발표, 참관 후기] }
+          - { name: venue, label: "학회 / 행사", widget: string, required: false }
+          - { name: authors, label: "저자 / 발표자", widget: string, required: false }
+          - { name: link, label: "원문 링크", widget: string, required: false }
+      - *f_body
+  - name: contests
+    label: "공모전/자격증"
+    folder: "posts/공모전-자격증"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    summary: "{{title}}"
+    media_folder: ../images
+    public_folder: ../images
+    fields:
+      - *f_title
+      - *f_tags
+      - *f_draft
+      - name: achievement
+        label: "공모전/자격증 정보 (글 위에 요약 박스로 표시)"
+        widget: object
+        required: false
+        collapsed: true
+        fields:
+          - { name: kind, label: "종류", widget: select, required: false, options: [자격증, 공모전, 해커톤] }
+          - { name: name, label: "이름", widget: string, required: false }
+          - { name: organizer, label: "주최", widget: string, required: false }
+          - { name: result, label: "결과", widget: string, required: false, hint: "합격, 수상, 준비 중 등" }
+          - { name: date, label: "날짜", widget: datetime, required: false, time_format: false, format: "YYYY-MM-DD" }
+      - *f_body

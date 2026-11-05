@@ -1,12 +1,12 @@
 import { execFileSync } from 'node:child_process';
 import { getCollection, type CollectionEntry } from 'astro:content';
-import { CATEGORIES } from '../consts';
+import { CATEGORIES, CATEGORY_GROUPS, CATEGORY_INFO, type CategoryInfo } from '../consts';
 
 type Entry = CollectionEntry<'posts'>;
 
 /** A post whose title, date and category are always filled in. */
 export type Post = Omit<Entry, 'data'> & {
-	data: Required<Omit<Entry['data'], 'title' | 'date' | 'category'>> & {
+	data: Omit<Entry['data'], 'title' | 'date' | 'category'> & {
 		title: string;
 		date: Date;
 		category: string;
@@ -81,6 +81,7 @@ export const postUrl = (post: Post) => url(`/${post.data.slug}/`);
 
 /** Top-level paths used by other pages; a post with one of these slugs would be shadowed. */
 export const RESERVED_SLUGS = [
+	'about',
 	'posts',
 	'categories',
 	'tags',
@@ -142,6 +143,22 @@ export function groupByCategory(posts: Post[]) {
 	const listedKeys = new Set(listed.map(([key]) => key));
 	return [...listed, ...[...groups].filter(([key]) => !listedKeys.has(key))];
 }
+/** Group, icon and description of a category; ones not in CATEGORY_INFO go under Study Notes. */
+export const categoryInfo = (label: string): CategoryInfo =>
+	CATEGORY_INFO[label] ?? { group: 'study', icon: 'folder', description: '' };
+
+/** Categories split into CATEGORY_GROUPS (Activity, Study Notes), each in CATEGORIES order. */
+export function groupCategories(posts: Post[]) {
+	const categories = groupByCategory(posts);
+	return CATEGORY_GROUPS.map((group) => ({
+		...group,
+		categories: categories.filter(([, { label }]) => categoryInfo(label).group === group.key),
+	}));
+}
+
+/** Day key (YYYY-MM-DD) in Korean time, matching formatDate. */
+export const dayKey = (date: Date) => date.toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+
 export const groupByTag = (posts: Post[]) => groupBy(posts, (p) => p.data.tags, tagKey);
 
 export const formatDate = (date: Date) =>

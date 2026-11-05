@@ -1,0 +1,139 @@
+---
+import Icon from '../components/Icon.astro';
+import Base from '../layouts/Base.astro';
+import { AUTHOR, GITHUB_URL } from '../consts';
+import { categoryInfo, formatDate, getPosts, groupByCategory, groupByTag, postUrl, url } from '../lib/posts';
+
+// ── 직접 고쳐 쓰는 부분 ──────────────────────────────────────────────
+const INTRO = [
+	'개발과 보안을 공부하며 배운 것을 기록하는 블로그입니다.',
+	'운영체제 · 컴퓨터 구조 · 네트워크 같은 CS 기초부터 윈도우 내부 구조와 리버싱, 시스템 해킹까지 공부한 내용을 정리해 왔어요.',
+];
+
+/** Newest first. `post` links to a post by its file name without the date. */
+const TIMELINE: { date: string; title: string; detail?: string; href?: string }[] = [
+	{ date: '2026.10.31', title: 'Knights Frontier 3기 입단', detail: '6개 카테고리로 블로그 개편' },
+	{ date: '2026.09', title: 'Astro로 블로그 이전', detail: 'Jekyll 테마에서 직접 만든 Astro 블로그로' },
+];
+// ────────────────────────────────────────────────────────────────────
+
+const posts = await getPosts();
+const first = posts.at(-1);
+const usedCategories = groupByCategory(posts).filter(([, g]) => g.posts.length).length;
+const tags = groupByTag(posts);
+const topTags = tags.slice(0, 12);
+
+// 관심 분야: the categories with the most posts, each with its most used tags.
+const INTEREST_COUNT = 4;
+const interests = groupByCategory(posts)
+	.filter(([, g]) => g.posts.length)
+	.sort((a, b) => b[1].posts.length - a[1].posts.length)
+	.slice(0, INTEREST_COUNT)
+	.map(([key, { label, posts: inCategory }]) => ({
+		href: url(`/categories/${key}/`),
+		icon: categoryInfo(label).icon,
+		title: label,
+		count: inCategory.length,
+		// a tag that just repeats the category name (#DB in DB) says nothing
+		tags: groupByTag(inCategory)
+			.filter(([tag]) => tag !== label.toLowerCase())
+			.slice(0, 4)
+			.map(([, t]) => t.label),
+	}));
+
+const timeline = first
+	? [
+			...TIMELINE,
+			{
+				date: formatDate(first.data.date).replace(/\. ?/g, '.').replace(/\.$/, ''),
+				title: '공부 기록 시작',
+				detail: `첫 글: ${first.data.title}`,
+				href: postUrl(first),
+			},
+		]
+	: TIMELINE;
+
+const stats = [
+	{ label: '글', value: posts.length },
+	{ label: '카테고리', value: usedCategories },
+	{ label: '태그', value: tags.length },
+	{ label: '기록 시작', value: first ? first.data.date.getFullYear() : '-' },
+];
+---
+
+<Base title="소개" description={INTRO[0]}>
+	<section class="hero about-hero">
+		<img class="avatar" src={`${GITHUB_URL}.png?size=192`} alt="" width="96" height="96" />
+		<div>
+			<h1>{AUTHOR}</h1>
+			<div class="hero-links">
+				<a href={GITHUB_URL}><Icon name="github" size={16} /> GitHub</a>
+				<a href={url('/rss.xml')}><Icon name="rss" size={16} /> RSS</a>
+			</div>
+		</div>
+	</section>
+
+	<div class="about-intro">
+		{INTRO.map((line) => <p>{line}</p>)}
+	</div>
+
+	<ul class="stat-row">
+		{
+			stats.map((s) => (
+				<li>
+					<strong>{s.value}</strong>
+					<span>{s.label}</span>
+				</li>
+			))
+		}
+	</ul>
+
+	<h2 class="section-title">관심 분야</h2>
+	<ul class="interest-grid">
+		{
+			interests.map((item) => (
+				<li>
+					<a href={item.href}>
+						<span class="cat-icon">
+							<Icon name={item.icon} />
+						</span>
+						<div>
+							<strong>
+								{item.title} <small>글 {item.count}개</small>
+							</strong>
+							{item.tags.length > 0 && <span>{item.tags.map((t) => `#${t}`).join('  ')}</span>}
+						</div>
+					</a>
+				</li>
+			))
+		}
+	</ul>
+
+	<h2 class="section-title">활동 타임라인</h2>
+	<ol class="timeline">
+		{
+			timeline.map((item) => (
+				<li>
+					<time>{item.date}</time>
+					<div>
+						<strong>{item.href ? <a href={item.href}>{item.title}</a> : item.title}</strong>
+						{item.detail && <span>{item.detail}</span>}
+					</div>
+				</li>
+			))
+		}
+	</ol>
+
+	<h2 class="section-title">자주 쓰는 태그</h2>
+	<ul class="tags about-tags">
+		{
+			topTags.map(([key, { label, posts }]) => (
+				<li>
+					<a class="chip" href={url(`/tags/${key}/`)}>
+						#{label} <small>{posts.length}</small>
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</Base>

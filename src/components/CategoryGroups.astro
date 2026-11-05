@@ -1,0 +1,44 @@
+---
+import { groupCategories, categoryInfo, url, type Post } from '../lib/posts';
+import Icon from './Icon.astro';
+
+interface Props {
+	posts: Post[];
+	/** Heading level for the group titles. */
+	level?: 'h2' | 'h3';
+}
+
+const { posts, level: Heading = 'h2' } = Astro.props;
+const groups = groupCategories(posts);
+---
+
+{
+	groups.map((group) => (
+		<section class:list={['cat-group', `cat-group-${group.key}`]}>
+			<div class="cat-group-head">
+				<Heading class="cat-group-title">{group.label}</Heading>
+				<p>{group.description}</p>
+			</div>
+			<ul class="cat-grid">
+				{group.categories.map(([key, { label, posts }]) => {
+					const info = categoryInfo(label);
+					return (
+						<li>
+							<a class:list={['cat-card', { empty: !posts.length }]} href={url(`/categories/${key}/`)}>
+								<span class="cat-icon">
+									<Icon name={info.icon} />
+								</span>
+								<span class="cat-body">
+									<span class="cat-name">
+										{label} <small>{posts.length}</small>
+									</span>
+									{info.description && <span class="cat-desc">{info.description}</span>}
+								</span>
+							</a>
+						</li>
+					);
+				})}
+			</ul>
+		</section>
+	))
+}

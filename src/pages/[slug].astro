@@ -1,5 +1,6 @@
 ---
 import { render } from 'astro:content';
+import PostMeta from '../components/PostMeta.astro';
 import Base from '../layouts/Base.astro';
 import {
 	RESERVED_SLUGS,
@@ -50,6 +51,8 @@ const toc = bodyHeadings.filter((h) => h.depth >= 1 && h.depth <= 3);
 			<h1>{post.data.title}</h1>
 			<time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
 		</header>
+
+		<PostMeta data={post.data} />
 
 		{
 			toc.length > 2 && (

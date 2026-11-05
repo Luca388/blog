@@ -1,0 +1,137 @@
+---
+/**
+ * GitHub-style grid of the days posts were written, one calendar year at a time.
+ * Built at build time; a few lines of script switch between years.
+ */
+import { dayKey, type Post } from '../lib/posts';
+
+interface Props {
+	posts: Post[];
+}
+
+const { posts } = Astro.props;
+
+const byDay = new Map<string, string[]>();
+for (const post of posts) {
+	const key = dayKey(post.data.date);
+	byDay.set(key, [...(byDay.get(key) ?? []), post.data.title]);
+}
+
+const todayKey = dayKey(new Date());
+const thisYear = Number(todayKey.slice(0, 4));
+const years = [...new Set(posts.map((p) => Number(dayKey(p.data.date).slice(0, 4))))]
+	.filter((y) => y <= thisYear)
+	.sort((a, b) => b - a);
+if (!years.includes(thisYear)) years.unshift(thisYear);
+
+const level = (n: number) => (n === 0 ? 0 : n === 1 ? 1 : n === 2 ? 2 : n <= 4 ? 3 : 4);
+const MONTHS = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+
+function yearGrid(year: number) {
+	const first = new Date(Date.UTC(year, 0, 1));
+	const start = new Date(first);
+	start.setUTCDate(1 - first.getUTCDay()); // back to Sunday
+	const last = new Date(Date.UTC(year, 11, 31));
+	const weeks: { key: string; inYear: boolean; future: boolean; titles: string[] }[][] = [];
+	const months: { label: string; col: number }[] = [];
+	for (let d = new Date(start); d <= last; d.setUTCDate(d.getUTCDate() + 7)) {
+		const week = [];
+		for (let i = 0; i < 7; i++) {
+			const day = new Date(d);
+			day.setUTCDate(d.getUTCDate() + i);
+			const key = day.toISOString().slice(0, 10);
+			const inYear = day.getUTCFullYear() === year;
+			if (inYear && day.getUTCDate() === 1) months.push({ label: MONTHS[day.getUTCMonth()], col: weeks.length + 1 });
+			week.push({ key, inYear, future: key > todayKey, titles: inYear ? (byDay.get(key) ?? []) : [] });
+		}
+		weeks.push(week);
+	}
+	const days = weeks.flat().filter((d) => d.titles.length);
+	return {
+		year,
+		weeks,
+		months,
+		total: days.reduce((sum, d) => sum + d.titles.length, 0),
+		activeDays: days.length,
+	};
+}
+
+const grids = years.map(yearGrid);
+---
+
+<section class="heatmap" data-heatmap>
+	<div class="heatmap-head">
+		<h2 class="section-title">기록</h2>
+		<div class="heatmap-years" role="tablist" aria-label="연도">
+			{
+				grids.map((g, i) => (
+					<button type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-year={g.year}>
+						{g.year}
+					</button>
+				))
+			}
+		</div>
+	</div>
+	{
+		grids.map((g, i) => (
+			<div class="heatmap-year" data-year={g.year} hidden={i !== 0}>
+				<p class="heatmap-summary">
+					{g.year}년에 <strong>{g.total}개</strong>의 글, <strong>{g.activeDays}일</strong> 기록했어요
+				</p>
+				<div class="heatmap-scroll">
+					<div class="heatmap-months" style={`grid-template-columns: repeat(${g.weeks.length}, var(--cell))`}>
+						{g.months.map((m) => (
+							<span style={`grid-column: ${m.col}`}>{m.label}</span>
+						))}
+					</div>
+					<div
+						class="heatmap-grid"
+						role="img"
+						aria-label={`${g.year}년 글 ${g.total}개, 기록한 날 ${g.activeDays}일`}
+					>
+						{g.weeks.map((week) =>
+							week.map((day) =>
+								day.inYear ? (
+									<span
+										class:list={['cell', `l${level(day.titles.length)}`, { future: day.future, today: day.key === todayKey }]}
+										title={
+											day.titles.length
+												? `${day.key} · 글 ${day.titles.length}개\n${day.titles.join('\n')}`
+												: day.key
+										}
+									/>
+								) : (
+									<span class="cell out" />
+								),
+							),
+						)}
+					</div>
+				</div>
+				<div class="heatmap-legend" aria-hidden="true">
+					적음 <span class="cell l0" /><span class="cell l1" /><span class="cell l2" /><span class="cell l3" /><span class="cell l4" /> 많음
+				</div>
+			</div>
+		))
+	}
+</section>
+
+<script is:inline>
+	document.querySelectorAll('[data-heatmap]').forEach((root) => {
+		const tabs = root.querySelectorAll('button[data-year]');
+		const panels = root.querySelectorAll('.heatmap-year');
+		// on narrow screens, start scrolled to today rather than January
+		const reveal = (panel) => {
+			const scroller = panel.querySelector('.heatmap-scroll');
+			const today = panel.querySelector('.today');
+			scroller.scrollLeft = today ? today.offsetLeft - scroller.clientWidth + 48 : scroller.scrollWidth;
+		};
+		tabs.forEach((tab) =>
+			tab.addEventListener('click', () => {
+				tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+				panels.forEach((p) => (p.hidden = p.dataset.year !== tab.dataset.year));
+				reveal(root.querySelector(`.heatmap-year[data-year="${tab.dataset.year}"]`));
+			}),
+		);
+		reveal(panels[0]);
+	});
+</script>

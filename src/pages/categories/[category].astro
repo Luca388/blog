@@ -1,7 +1,9 @@
 ---
+import Icon from '../../components/Icon.astro';
 import PostList from '../../components/PostList.astro';
 import Base from '../../layouts/Base.astro';
-import { getPosts, groupByCategory, type Post } from '../../lib/posts';
+import { CATEGORY_GROUPS } from '../../consts';
+import { categoryInfo, getPosts, groupByCategory, url, type Post } from '../../lib/posts';
 
 export async function getStaticPaths() {
 	return groupByCategory(await getPosts()).map(([category, { label, posts }]) => ({
@@ -16,9 +18,41 @@ interface Props {
 }
 
 const { label, posts } = Astro.props;
+const info = categoryInfo(label);
+const group = CATEGORY_GROUPS.find((g) => g.key === info.group);
 ---
 
-<Base title={label}>
-	<h1 class="page-title">{label} <small>{posts.length}</small></h1>
-	{posts.length ? <PostList posts={posts} showCategory={false} /> : <p>아직 글이 없어요.</p>}
+<Base title={label} description={info.description || undefined}>
+	<header class="cat-header">
+		<span class="cat-icon cat-icon-lg">
+			<Icon name={info.icon} size={26} />
+		</span>
+		<div>
+			<a class="cat-crumb" href={url('/categories/')}>{group?.label ?? '카테고리'}</a>
+			<h1 class="page-title">{label} <small>{posts.length}</small></h1>
+			{info.description && <p class="cat-lead">{info.description}</p>}
+		</div>
+	</header>
+	{
+		posts.length ? (
+			<PostList posts={posts} showCategory={false} />
+		) : (
+			<div class="empty-state">
+				<p class="empty-title">아직 글이 없어요</p>
+				{info.plans?.length ? (
+					<>
+						<p>이 카테고리에는 이런 글이 올라올 예정이에요.</p>
+						<ul>
+							{info.plans.map((plan) => (
+								<li>{plan}</li>
+							))}
+						</ul>
+					</>
+				) : (
+					<p>곧 첫 글이 올라올 예정이에요.</p>
+				)}
+				<a href={url('/posts/')}>다른 글 둘러보기 →</a>
+			</div>
+		)
+	}
 </Base>

@@ -1,11 +1,13 @@
 ---
+import CategoryGroups from '../components/CategoryGroups.astro';
+import Heatmap from '../components/Heatmap.astro';
+import Icon from '../components/Icon.astro';
 import Base from '../layouts/Base.astro';
 import { AUTHOR, GITHUB_URL, SITE_DESCRIPTION } from '../consts';
-import { categoryKey, excerpt, formatDate, getPosts, groupByCategory, postUrl, url } from '../lib/posts';
+import { categoryKey, excerpt, formatDate, getPosts, postUrl, url } from '../lib/posts';
 
 const posts = await getPosts();
 const recent = posts.slice(0, 6);
-const categories = groupByCategory(posts);
 ---
 
 <Base>
@@ -15,20 +17,15 @@ const categories = groupByCategory(posts);
 			<h1>{AUTHOR}</h1>
 			<p>{SITE_DESCRIPTION}</p>
 			<div class="hero-links">
-				<a href={GITHUB_URL}>GitHub</a>
+				<a href={url('/about/')}><Icon name="user" size={16} /> 소개</a>
+				<a href={GITHUB_URL}><Icon name="github" size={16} /> GitHub</a>
 			</div>
 		</div>
 	</section>
 
-	<nav class="category-bar" aria-label="카테고리">
-		{
-			categories.map(([key, { label, posts }]) => (
-				<a class:list={['chip', { empty: !posts.length }]} href={url(`/categories/${key}/`)}>
-					{label} <small>{posts.length}</small>
-				</a>
-			))
-		}
-	</nav>
+	<CategoryGroups posts={posts} />
+
+	<Heatmap posts={posts} />
 
 	<h2 class="section-title">최근 글</h2>
 	<ul class="card-grid">

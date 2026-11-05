@@ -1,0 +1,125 @@
+---
+/** Summary box for the optional per-category front matter (ctf, bugbounty, paper, achievement, project). */
+import { formatDate, type Post } from '../lib/posts';
+import Icon from './Icon.astro';
+
+interface Props {
+	data: Post['data'];
+}
+
+const { data } = Astro.props;
+type Value = string | string[] | null | undefined;
+type Row = [label: string, value: Value, kind?: 'link'];
+
+const date = (d?: Date | null) => (d ? formatDate(d) : undefined);
+
+const boxes: { title: string; icon: string; rows: Row[] }[] = [];
+if (data.ctf) {
+	const c = data.ctf;
+	boxes.push({
+		title: 'CTF / Wargame',
+		icon: 'flag',
+		rows: [
+			['플랫폼', c.platform],
+			['대회', c.event],
+			['분야', c.field],
+			['난이도', c.difficulty],
+			['푼 날짜', date(c.solved)],
+			['문제', c.link, 'link'],
+		],
+	});
+}
+if (data.bugbounty) {
+	const b = data.bugbounty;
+	boxes.push({
+		title: 'Bug Bounty',
+		icon: 'bug',
+		rows: [
+			['대상', b.target],
+			['플랫폼', b.platform],
+			['취약점', b.type],
+			['심각도', b.severity],
+			['상태', b.status],
+			['제보일', date(b.reported)],
+			['리포트', b.link, 'link'],
+		],
+	});
+}
+if (data.paper) {
+	const p = data.paper;
+	boxes.push({
+		title: p.kind ?? '논문 / 컨퍼런스',
+		icon: 'book',
+		rows: [
+			['학회 / 행사', p.venue],
+			['저자 / 발표자', p.authors],
+			['원문', p.link, 'link'],
+		],
+	});
+}
+if (data.achievement) {
+	const a = data.achievement;
+	boxes.push({
+		title: a.kind ?? '공모전 / 자격증',
+		icon: 'award',
+		rows: [
+			['이름', a.name],
+			['주최', a.organizer],
+			['결과', a.result],
+			['날짜', date(a.date)],
+		],
+	});
+}
+if (data.project) {
+	const p = data.project;
+	boxes.push({
+		title: '프로젝트',
+		icon: 'code',
+		rows: [
+			['기간', p.period],
+			['기술', p.stack?.length ? p.stack : undefined],
+			['저장소', p.repo, 'link'],
+			['데모', p.demo, 'link'],
+		],
+	});
+}
+
+const shown = boxes
+	.map((box) => ({
+		...box,
+		// skip blanks, and links still holding a template placeholder
+		rows: box.rows.filter(([, value, kind]) =>
+			kind === 'link' ? typeof value === 'string' && /^https?:\/\/\S+\.\S+/.test(value) : value != null && value !== '',
+		),
+	}))
+	.filter((box) => box.rows.length);
+
+const linkText = (href: string) => href.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+---
+
+{
+	shown.map((box) => (
+		<aside class="post-meta">
+			<p class="post-meta-title">
+				<Icon name={box.icon} size={16} />
+				{box.title}
+			</p>
+			<dl>
+				{box.rows.map(([label, value, kind]) => (
+					<div>
+						<dt>{label}</dt>
+						<dd>
+							{kind === 'link' ? (
+								<a href={value as string}>{linkText(value as string)}</a>
+							) : Array.isArray(value) ? (
+								value.map((v) => <span class="chip">{v}</span>)
+							) : (
+								value
+							)}
+						</dd>
+					</div>
+				))}
+			</dl>
+		</aside>
+	))
+}
