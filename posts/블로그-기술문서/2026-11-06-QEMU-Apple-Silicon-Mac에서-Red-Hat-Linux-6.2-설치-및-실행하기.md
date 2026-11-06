@@ -3,8 +3,6 @@ title: '[QEMU] Apple Silicon Mac에서 Red Hat Linux 6.2 설치 및 실행하기
 draft: false
 ---
 
-# 
-
 ## 1. 개요
 
 시스템 보안 수업에서 스택 버퍼 오버플로우 실습을 진행하기 위해 오래된 Linux 환경이 필요했다.
