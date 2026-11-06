@@ -76,6 +76,7 @@ const sidebarGroups = groupCategories(await getPosts());
 					<button
 						id="sidebar-toggle"
 						class="icon-btn"
+						data-sidebar-toggle
 						type="button"
 						aria-controls="sidebar"
 						aria-expanded="false"
@@ -100,6 +101,17 @@ const sidebarGroups = groupCategories(await getPosts());
 				</nav>
 			</div>
 		</header>
+		<!-- the same button, floating at the top left once the header has scrolled away -->
+		<button
+			class="icon-btn sidebar-fab"
+			data-sidebar-toggle
+			type="button"
+			aria-controls="sidebar"
+			aria-expanded="false"
+			aria-label="사이드바 열기/닫기"
+		>
+			<Icon name="sidebar" size={18} />
+		</button>
 		<div class="shell">
 			<aside class="sidebar" id="sidebar" aria-label="사이드바">
 				<div class="sidebar-inner">
@@ -176,25 +188,33 @@ const sidebarGroups = groupCategories(await getPosts());
 			(() => {
 				const root = document.documentElement;
 				const wide = matchMedia('(min-width: 1100px)');
-				const toggle = document.getElementById('sidebar-toggle');
-				const sync = () =>
-					toggle.setAttribute(
-						'aria-expanded',
-						String(wide.matches ? root.dataset.sidebar !== 'closed' : root.dataset.drawer === 'open'),
-					);
+				const toggles = document.querySelectorAll('[data-sidebar-toggle]');
+				const sync = () => {
+					const open = wide.matches ? root.dataset.sidebar !== 'closed' : root.dataset.drawer === 'open';
+					toggles.forEach((t) => t.setAttribute('aria-expanded', String(open)));
+				};
 				const setDrawer = (open) => {
 					if (open) root.dataset.drawer = 'open';
 					else delete root.dataset.drawer;
 					sync();
 				};
-				toggle.addEventListener('click', () => {
+				const toggle = () => {
 					if (!wide.matches) return setDrawer(root.dataset.drawer !== 'open');
 					root.dataset.sidebar = root.dataset.sidebar === 'closed' ? 'open' : 'closed';
 					try {
 						localStorage.setItem('sidebar', root.dataset.sidebar);
 					} catch {}
 					sync();
-				});
+				};
+				toggles.forEach((t) => t.addEventListener('click', toggle));
+				// show the floating button only while the header (and its button) is scrolled out of view
+				const header = document.querySelector('.site-header');
+				const onScroll = () => {
+					if (scrollY > header.offsetHeight) root.dataset.scrolled = '';
+					else delete root.dataset.scrolled;
+				};
+				addEventListener('scroll', onScroll, { passive: true });
+				onScroll();
 				document.querySelectorAll('[data-sidebar-close]').forEach((el) => el.addEventListener('click', () => setDrawer(false)));
 				document.addEventListener('keydown', (e) => e.key === 'Escape' && setDrawer(false));
 				wide.addEventListener('change', () => setDrawer(false));
