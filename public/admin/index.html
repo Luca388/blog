@@ -24,9 +24,60 @@
 	<body>
 		<!-- Web editor for posts/ (Sveltia CMS). Settings are in config.yml next to this file. -->
 		<script src="https://unpkg.com/@sveltia/cms@0.262.1/dist/sveltia-cms.js"></script>
+		<!-- For the preview: KaTeX (same version as the site) and the site's Markdown fixes -->
+		<script src="https://cdn.jsdelivr.net/npm/katex@0.19.1/dist/katex.min.js"></script>
+		<script src="markdown-fixes.js"></script>
 		<script>
 			// The preview pane uses the blog's post look (preview.css next to this file).
 			CMS.registerPreviewStyle('preview.css');
+			CMS.registerPreviewStyle('https://cdn.jsdelivr.net/npm/katex@0.19.1/dist/katex.min.css');
+
+			// The preview shows a post the way the site does: the same Markdown fixes (\( \) math, bold
+			// next to Korean), then math through KaTeX. Sveltia's own preview has no math.
+			(() => {
+				const { h, marked, DOMPurify, katex, markdownFixes } = window;
+
+				function renderBody(markdown, getAsset) {
+					const { text, math } = markdownFixes.protectMath(markdownFixes.fixMarkdown(markdown));
+					const html = DOMPurify.sanitize(marked.parse(text, { gfm: true }));
+					// a formula alone in its paragraph is a block, as on the site
+					const withMath = html.replace(/<p[^>]*>@@math(\d+)@@<\/p>|@@math(\d+)@@/g, (_, block, inline) =>
+						katex.renderToString(math[Number(block ?? inline)].tex, {
+							displayMode: block !== undefined,
+							throwOnError: false,
+						}),
+					);
+					// ../images/… paths through the editor, which knows saved and not-yet-saved files
+					const doc = new DOMParser().parseFromString(withMath, 'text/html');
+					doc.querySelectorAll('img[src]').forEach((img) => {
+						const src = img.getAttribute('src');
+						if (/^(?:[a-z]+:|\/\/)/i.test(src)) return;
+						const url = getAsset(src)?.url;
+						if (url) img.setAttribute('src', url);
+					});
+					return doc.body.innerHTML;
+				}
+
+				const PostPreview = ({ entry, getAsset }) => {
+					const title = entry.getIn(['data', 'title']) || '';
+					const tags = entry.getIn(['data', 'tags'])?.toJS?.() ?? [];
+					return h(
+						'article',
+						null,
+						title ? h('h1', { className: 'preview-title' }, title) : null,
+						tags.length ? h('p', { className: 'preview-tags' }, tags.map((tag) => `#${tag}`).join('  ')) : null,
+						h('div', {
+							className: 'prose',
+							dangerouslySetInnerHTML: { __html: renderBody(entry.getIn(['data', 'body']) ?? '', getAsset) },
+						}),
+					);
+				};
+
+				// every collection in config.yml
+				['dev', 'ctf', 'bugbounty', 'docs', 'papers', 'contests', 'cs', 'security', 'db', 'language', 'algorithm', 'math'].forEach(
+					(name) => CMS.registerPreviewTemplate(name, PostPreview),
+				);
+			})();
 
 			// Photos uploaded in the "사진 올리기" field go into the body on save: each fills the next
 			// empty `![]()` (what the image button inserts in Markdown mode), or goes at the end.

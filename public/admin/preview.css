@@ -111,9 +111,20 @@ pre code {
 	font-size: inherit;
 }
 
-/* The title field reads as the post title. */
-[data-key-path='title'] {
+/* Title and tags above the post (the preview template in index.html). */
+.preview-title {
+	margin: 0 0 0.3em;
 	font-size: 2rem;
-	font-weight: 700;
 	line-height: 1.35;
+}
+.preview-tags {
+	margin: 0 0 1.5em;
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+/* long $$block$$ math scrolls instead of widening the page */
+.katex-display {
+	overflow-x: auto;
+	overflow-y: hidden;
+	padding: 4px 0;
 }
