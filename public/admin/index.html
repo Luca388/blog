@@ -57,17 +57,50 @@
 				let count = 0;
 
 				// Until the post is saved, ../images/<new file> is not in the repo, so the preview's
-				// <img> points at nothing. Show the browser's own copy of the file there instead.
+				// <img> points at nothing. Show the browser's own copy of the file there instead,
+				// re-applied whenever the preview (an iframe) redraws.
 				const previews = new Map(); // file name -> blob: URL
-				setInterval(() => {
+				const swap = (doc) => {
 					if (!previews.size) return;
-					for (const frame of document.querySelectorAll('iframe')) {
-						frame.contentDocument?.querySelectorAll('img').forEach((img) => {
-							const url = previews.get((img.getAttribute('src') ?? '').split('/').pop());
-							if (url && img.getAttribute('src') !== url) img.src = url;
+					doc.querySelectorAll('img').forEach((img) => {
+						const url = previews.get((img.getAttribute('src') ?? '').split('/').pop());
+						if (url) img.src = url;
+					});
+				};
+				const watched = new WeakSet();
+				const watchFrame = (frame) => {
+					const hook = () => {
+						const doc = frame.contentDocument;
+						if (!doc || watched.has(doc)) return;
+						watched.add(doc);
+						new MutationObserver(() => swap(doc)).observe(doc, {
+							childList: true,
+							subtree: true,
+							attributes: true,
+							attributeFilter: ['src'],
 						});
+						swap(doc);
+					};
+					frame.addEventListener('load', hook);
+					hook();
+				};
+				new MutationObserver((records) => {
+					for (const { addedNodes } of records) {
+						for (const node of addedNodes) {
+							if (node.nodeName === 'IFRAME') watchFrame(node);
+							else if (node.querySelectorAll) node.querySelectorAll('iframe').forEach(watchFrame);
+						}
 					}
-				}, 400);
+				}).observe(document.body, { childList: true, subtree: true });
+
+				// Once saved, the files are in the repo and the editor shows them itself.
+				CMS.registerEventListener({
+					name: 'postSave',
+					handler: () => {
+						previews.forEach((url) => URL.revokeObjectURL(url));
+						previews.clear();
+					},
+				});
 
 				function insert(textarea, files) {
 					const upload = document.querySelector('section[data-key-path="photos"] input[type="file"]');
