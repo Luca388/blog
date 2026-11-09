@@ -68,6 +68,7 @@ const sidebarGroups = groupCategories(await getPosts());
 				document.documentElement.dataset.sidebar = sidebar === 'closed' ? 'closed' : 'open';
 			})();
 		</script>
+		<slot name="head" />
 	</head>
 	<body>
 		<header class="site-header">

@@ -100,6 +100,8 @@ export function excerpt(post: Post, length = 120) {
 	if (post.data.titleFromBody) text = text.trimStart().replace(/^#[^\n]*\n?/, '');
 	text = text
 		.replace(/```[\s\S]*?```/g, ' ') // code blocks
+		.replace(/\$\$[\s\S]*?\$\$/g, ' ') // block math
+		.replace(/\$([^\s$][^$\n]*)\$/g, '$1') // inline math keeps its TeX, without the $
 		.replace(/<[^>]+>/g, ' ') // html
 		.replace(/!\[[^\]]*\]\([^)]*\)/g, ' ') // images
 		.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // links keep their text

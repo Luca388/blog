@@ -712,7 +712,8 @@ a:hover {
 	grid-template-rows: repeat(7, auto);
 	grid-auto-flow: column;
 }
-.heatmap .cell {
+.heatmap .cell,
+.heatmap-grid > i {
 	display: inline-block;
 	width: var(--cell);
 	height: var(--cell);
@@ -721,30 +722,30 @@ a:hover {
 	outline: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
 	outline-offset: -1px;
 }
-.heatmap-grid .cell {
+.heatmap-grid > i {
 	width: auto;
 	height: auto;
 	aspect-ratio: 1;
 }
-.heatmap .cell.out {
+.heatmap .out {
 	visibility: hidden;
 }
-.heatmap .cell.future {
+.heatmap .future {
 	opacity: 0.4;
 }
-.heatmap .cell.today {
+.heatmap .today {
 	outline: 1.5px solid var(--text);
 }
-.heatmap .cell.l1 {
+.heatmap .l1 {
 	background: color-mix(in srgb, var(--accent) 30%, var(--bg));
 }
-.heatmap .cell.l2 {
+.heatmap .l2 {
 	background: color-mix(in srgb, var(--accent) 52%, var(--bg));
 }
-.heatmap .cell.l3 {
+.heatmap .l3 {
 	background: color-mix(in srgb, var(--accent) 76%, var(--bg));
 }
-.heatmap .cell.l4 {
+.heatmap .l4 {
 	background: var(--accent);
 }
 .heatmap-legend {
@@ -1160,6 +1161,12 @@ a:hover {
 }
 .prose pre code {
 	font-family: inherit;
+}
+/* long $$block$$ math scrolls instead of widening the page */
+.prose .katex-display {
+	overflow-x: auto;
+	overflow-y: hidden;
+	padding: 4px 0;
 }
 
 /* shiki dual themes: light is inline, dark comes from CSS variables */

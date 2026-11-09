@@ -5,9 +5,28 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="robots" content="noindex" />
 		<title>글쓰기 · Luca's development diary</title>
+		<link rel="icon" href="/blog/favicon.svg" type="image/svg+xml" />
+		<style>
+			/* Editor pane: a big title box and a roomier body, like a blog editor.
+			   Fields carry data-key-path; Sveltia's own class names change between releases. */
+			section[data-key-path='title'] input {
+				font-size: 1.6em !important;
+				font-weight: 700 !important;
+				padding-block: 0.4em !important;
+			}
+			section[data-key-path='body'] [contenteditable='true'] {
+				font-size: 16px !important;
+				line-height: 1.8 !important;
+				min-height: 60vh !important;
+			}
+		</style>
 	</head>
 	<body>
 		<!-- Web editor for posts/ (Sveltia CMS). Settings are in config.yml next to this file. -->
-		<script src="https://unpkg.com/@sveltia/cms@0.240.0/dist/sveltia-cms.js"></script>
+		<script src="https://unpkg.com/@sveltia/cms@0.262.1/dist/sveltia-cms.js"></script>
+		<script>
+			// The preview pane uses the blog's post look (preview.css next to this file).
+			CMS.registerPreviewStyle('preview.css');
+		</script>
 	</body>
 </html>

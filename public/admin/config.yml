@@ -13,6 +13,13 @@ backend:
 
 locale: ko
 
+# Look: name and logo on the sign-in page and header, and the "view site" link.
+app_title: "Luca's development diary · 글쓰기"
+logo:
+  src: /blog/favicon.svg
+site_url: https://luca388.github.io/blog
+display_url: https://luca388.github.io/blog/
+
 # Images go to posts/images/. The links posts use (../images/<file>, same as images pasted in
 # VS Code/Obsidian) are set per collection, since relative paths are only allowed there.
 media_folder: /posts/images
@@ -32,18 +39,34 @@ output:
   # An empty title would otherwise be saved as `title: ""`.
   omit_empty_optional_fields: true
 
-# One collection per category folder. Keep in sync with CATEGORIES in src/consts.ts.
-# CS comes first because it defines the shared fields (&fields); the sidebar order follows this list.
+# One collection per category folder. Keep in sync with CATEGORIES (order, names) and
+# CATEGORY_INFO (descriptions) in src/consts.ts. The sidebar shows Activity, a line, then Study Notes.
+# 개발 comes first because it defines the shared settings (&…) the others reuse.
+# Icons are Material Symbols names: https://fonts.google.com/icons
 collections:
-  - name: cs
-    label: CS
-    folder: posts/CS
+  # ── Activity ─────────────────────────────────────────────────────────
+  - name: dev
+    label: "개발"
+    label_singular: "개발 글"
+    description: "직접 만든 프로젝트와 도구의 제작기"
+    icon: code
+    folder: "posts/개발"
     create: true
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    summary: "{{title}}"
+    slug: &slug "{{year}}-{{month}}-{{day}}-{{slug}}"
+    # Drafts are marked in the list.
+    summary: &summary "{{title}}{{draft | ternary(' `임시 저장`', '')}}"
+    # The file name starts with the date, so sorting by it is newest first.
+    sortable_fields: &sort
+      - { field: slug, label: "날짜", default_sort: desc }
+      - { field: title, label: "제목" }
+      - { field: commit_date, label: "마지막 수정" }
+    view_filters: &filters
+      - { label: "임시 저장한 글", field: draft, pattern: true }
+    view_groups: &groups
+      - { label: "연도", field: slug, pattern: '^\d{4}' }
     media_folder: ../images
     public_folder: ../images
-    fields: &fields
+    fields:
       - &f_title
         name: title
         label: 제목
@@ -55,33 +78,6 @@ collections:
         label: 태그
         widget: list
         required: false
-      - &f_draft
-        name: draft
-        label: 임시 저장 (사이트에 안 보임)
-        widget: boolean
-        required: false
-        default: false
-      - &f_body
-        name: body
-        label: 본문
-        widget: markdown
-  - { name: db, label: DB, folder: posts/DB, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
-  - { name: security, label: Security, folder: posts/Security, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
-  - { name: language, label: Language, folder: posts/Language, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
-  - { name: math, label: Math, folder: posts/Math, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
-  - { name: algorithm, label: Algorithm, folder: posts/Algorithm, create: true, slug: "{{year}}-{{month}}-{{day}}-{{slug}}", summary: "{{title}}", media_folder: ../images, public_folder: ../images, fields: *fields }
-  - name: dev
-    label: "개발"
-    folder: "posts/개발"
-    create: true
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    summary: "{{title}}"
-    media_folder: ../images
-    public_folder: ../images
-    fields:
-      - *f_title
-      - *f_tags
-      - *f_draft
       - name: project
         label: "프로젝트 정보 (글 위에 요약 박스로 표시)"
         widget: object
@@ -92,19 +88,37 @@ collections:
           - { name: demo, label: "데모 URL", widget: string, required: false }
           - { name: stack, label: "기술 스택", widget: list, required: false }
           - { name: period, label: "기간", widget: string, required: false, hint: "예: 2026.09 ~ 2026.10" }
-      - *f_body
+      - &f_body
+        name: body
+        label: 본문
+        widget: markdown
+        # Opens as Markdown (the preview on the right shows how it looks). The M↓ button
+        # switches to rich text, which rewrites the Markdown: it escapes `*` inside $math$, for one.
+        modes: [raw, rich_text]
+        editor_components: [code-block, image, table, hr]
+      - &f_draft
+        name: draft
+        label: 임시 저장 (사이트에 안 보임)
+        widget: boolean
+        required: false
+        default: false
   - name: ctf
     label: "CTF/Wargame"
+    label_singular: "풀이"
+    description: "CTF 대회와 워게임 문제 풀이 write-up"
+    icon: flag
     folder: "posts/CTF-Wargame"
     create: true
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    summary: "{{title}}"
+    slug: *slug
+    summary: *summary
+    sortable_fields: *sort
+    view_filters: *filters
+    view_groups: *groups
     media_folder: ../images
     public_folder: ../images
     fields:
       - *f_title
       - *f_tags
-      - *f_draft
       - name: ctf
         label: "문제 정보 (글 위에 요약 박스로 표시)"
         widget: object
@@ -118,18 +132,24 @@ collections:
           - { name: solved, label: "푼 날짜", widget: datetime, required: false, time_format: false, format: "YYYY-MM-DD" }
           - { name: link, label: "문제 링크", widget: string, required: false }
       - *f_body
+      - *f_draft
   - name: bugbounty
     label: "Bug Bounty"
+    label_singular: "리포트"
+    description: "취약점 탐색과 제보 경험, 공개된 리포트 정리"
+    icon: bug_report
     folder: "posts/BugBounty"
     create: true
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    summary: "{{title}}"
+    slug: *slug
+    summary: *summary
+    sortable_fields: *sort
+    view_filters: *filters
+    view_groups: *groups
     media_folder: ../images
     public_folder: ../images
     fields:
       - *f_title
       - *f_tags
-      - *f_draft
       - name: bugbounty
         label: "제보 정보 (글 위에 요약 박스로 표시)"
         widget: object
@@ -144,27 +164,44 @@ collections:
           - { name: reported, label: "제보일", widget: datetime, required: false, time_format: false, format: "YYYY-MM-DD" }
           - { name: link, label: "공개 리포트 / CVE 링크", widget: string, required: false }
       - *f_body
+      - *f_draft
   - name: docs
     label: "블로그/기술문서"
+    label_singular: "문서"
+    description: "기술 개념과 도구 사용법을 문서처럼 정리"
+    icon: description
     folder: "posts/블로그-기술문서"
     create: true
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    summary: "{{title}}"
+    slug: *slug
+    summary: *summary
+    sortable_fields: *sort
+    view_filters: *filters
+    view_groups: *groups
     media_folder: ../images
     public_folder: ../images
-    fields: *fields
+    # The plain fields every category without extra info uses.
+    fields: &fields
+      - *f_title
+      - *f_tags
+      - *f_body
+      - *f_draft
   - name: papers
     label: "논문/컨퍼런스"
+    label_singular: "논문 · 발표 글"
+    description: "보안 논문과 컨퍼런스 발표를 읽고 요약"
+    icon: menu_book
     folder: "posts/논문-컨퍼런스"
     create: true
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    summary: "{{title}}"
+    slug: *slug
+    summary: *summary
+    sortable_fields: *sort
+    view_filters: *filters
+    view_groups: *groups
     media_folder: ../images
     public_folder: ../images
     fields:
       - *f_title
       - *f_tags
-      - *f_draft
       - name: paper
         label: "논문/발표 정보 (글 위에 요약 박스로 표시)"
         widget: object
@@ -176,18 +213,24 @@ collections:
           - { name: authors, label: "저자 / 발표자", widget: string, required: false }
           - { name: link, label: "원문 링크", widget: string, required: false }
       - *f_body
+      - *f_draft
   - name: contests
     label: "공모전/자격증"
+    label_singular: "공모전 · 자격증 글"
+    description: "공모전 참가와 자격증 준비 과정, 결과"
+    icon: workspace_premium
     folder: "posts/공모전-자격증"
     create: true
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    summary: "{{title}}"
+    slug: *slug
+    summary: *summary
+    sortable_fields: *sort
+    view_filters: *filters
+    view_groups: *groups
     media_folder: ../images
     public_folder: ../images
     fields:
       - *f_title
       - *f_tags
-      - *f_draft
       - name: achievement
         label: "공모전/자격증 정보 (글 위에 요약 박스로 표시)"
         widget: object
@@ -200,3 +243,13 @@ collections:
           - { name: result, label: "결과", widget: string, required: false, hint: "합격, 수상, 준비 중 등" }
           - { name: date, label: "날짜", widget: datetime, required: false, time_format: false, format: "YYYY-MM-DD" }
       - *f_body
+      - *f_draft
+
+  # ── Study Notes ──────────────────────────────────────────────────────
+  - divider: true
+  - { name: cs, label: CS, description: "운영체제, 컴퓨터 구조, 네트워크", icon: memory, folder: posts/CS, create: true, slug: *slug, summary: *summary, sortable_fields: *sort, view_filters: *filters, view_groups: *groups, media_folder: ../images, public_folder: ../images, fields: *fields }
+  - { name: security, label: Security, description: "리버싱, 윈도우 내부 구조, 시스템 해킹, 암호", icon: shield, folder: posts/Security, create: true, slug: *slug, summary: *summary, sortable_fields: *sort, view_filters: *filters, view_groups: *groups, media_folder: ../images, public_folder: ../images, fields: *fields }
+  - { name: db, label: DB, description: "데이터 모델링과 SQL", icon: database, folder: posts/DB, create: true, slug: *slug, summary: *summary, sortable_fields: *sort, view_filters: *filters, view_groups: *groups, media_folder: ../images, public_folder: ../images, fields: *fields }
+  - { name: language, label: Language, description: "C, 어셈블리, 개발 환경", icon: terminal, folder: posts/Language, create: true, slug: *slug, summary: *summary, sortable_fields: *sort, view_filters: *filters, view_groups: *groups, media_folder: ../images, public_folder: ../images, fields: *fields }
+  - { name: algorithm, label: Algorithm, description: "자료구조와 알고리즘 문제 풀이", icon: account_tree, folder: posts/Algorithm, create: true, slug: *slug, summary: *summary, sortable_fields: *sort, view_filters: *filters, view_groups: *groups, media_folder: ../images, public_folder: ../images, fields: *fields }
+  - { name: math, label: Math, description: "대수, 정수론 등 수학 정리", icon: functions, folder: posts/Math, create: true, slug: *slug, summary: *summary, sortable_fields: *sort, view_filters: *filters, view_groups: *groups, media_folder: ../images, public_folder: ../images, fields: *fields }
