@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { CATEGORIES, CATEGORY_GROUPS, CATEGORY_INFO, type CategoryInfo } from '../consts';
+import { latexDelimiters } from './markdown-fixes.mjs';
 
 type Entry = CollectionEntry<'posts'>;
 
@@ -96,12 +97,16 @@ export const RESERVED_SLUGS = [
 
 /** The start of the body as plain text, for previews. */
 export function excerpt(post: Post, length = 120) {
-	let text = post.body ?? '';
+	let text = latexDelimiters(post.body ?? '');
 	if (post.data.titleFromBody) text = text.trimStart().replace(/^#[^\n]*\n?/, '');
+	// inline math keeps its TeX, without the $, set aside so the cleanup below leaves its _ and * alone
+	// (same rule as src/lib/katex.mjs: no space just inside the $, no digit right after: "$5 … $10" is text)
+	const math: string[] = [];
 	text = text
 		.replace(/```[\s\S]*?```/g, ' ') // code blocks
 		.replace(/\$\$[\s\S]*?\$\$/g, ' ') // block math
-		.replace(/\$([^\s$][^$\n]*)\$/g, '$1') // inline math keeps its TeX, without the $
+		.replace(/(?<!\\)\$(?=\S)([^$\n]*?\S)\$(?!\d)/g, (_, tex: string) => `\u0000${math.push(tex) - 1}\u0000`)
+		.replace(/\\\$/g, '$') // \$ is a plain dollar sign
 		.replace(/<[^>]+>/g, ' ') // html
 		.replace(/!\[[^\]]*\]\([^)]*\)/g, ' ') // images
 		.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1') // links keep their text
@@ -109,6 +114,7 @@ export function excerpt(post: Post, length = 120) {
 		.replace(/[-=]{3,}/g, ' ') // rules, table separators
 		.replace(/[`*_~|]/g, '')
 		.replace(/\s+/g, ' ')
+		.replace(/\u0000(\d+)\u0000/g, (_, i: string) => math[Number(i)])
 		.trim();
 	return text.length > length ? `${text.slice(0, length).trimEnd()}…` : text;
 }

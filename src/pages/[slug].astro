@@ -1,6 +1,7 @@
 ---
 import { render } from 'astro:content';
 import katex from 'katex';
+import { latexDelimiters } from '../lib/markdown-fixes.mjs';
 import PostMeta from '../components/PostMeta.astro';
 import Base from '../layouts/Base.astro';
 import {
@@ -41,8 +42,11 @@ const { Content, headings } = await render(post);
 // the leading `# heading` is already shown as the page title
 const bodyHeadings = post.data.titleFromBody ? headings.slice(1) : headings;
 const toc = bodyHeadings.filter((h) => h.depth >= 1 && h.depth <= 3);
-// KaTeX styles only for posts with $math$ outside code (see src/lib/katex.mjs); same version as the renderer.
-const hasMath = /\$\$|\$[^\s$][^$\n]*\$/.test((post.body ?? '').replace(/```[\s\S]*?```|`[^`\n]*`|^(?: {4}|\t).*$/gm, ''));
+// KaTeX styles only for posts with $math$ (or \( \), \[ \]) outside code (see src/lib/katex.mjs);
+// same version as the renderer.
+const hasMath = /\$\$|\$[^\s$][^$\n]*\$/.test(
+	latexDelimiters(post.body ?? '').replace(/```[\s\S]*?```|`[^`\n]*`|^(?: {4}|\t).*$/gm, ''),
+);
 const KATEX_CSS = `https://cdn.jsdelivr.net/npm/katex@${katex.version}/dist/katex.min.css`;
 ---
 
