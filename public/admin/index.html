@@ -56,6 +56,19 @@
 				const pad = (n, width = 2) => String(n).padStart(width, '0');
 				let count = 0;
 
+				// Until the post is saved, ../images/<new file> is not in the repo, so the preview's
+				// <img> points at nothing. Show the browser's own copy of the file there instead.
+				const previews = new Map(); // file name -> blob: URL
+				setInterval(() => {
+					if (!previews.size) return;
+					for (const frame of document.querySelectorAll('iframe')) {
+						frame.contentDocument?.querySelectorAll('img').forEach((img) => {
+							const url = previews.get((img.getAttribute('src') ?? '').split('/').pop());
+							if (url && img.getAttribute('src') !== url) img.src = url;
+						});
+					}
+				}, 400);
+
 				function insert(textarea, files) {
 					const upload = document.querySelector('section[data-key-path="photos"] input[type="file"]');
 					if (!upload) return false;
@@ -65,6 +78,7 @@
 						const ext = (file.name.match(/\.[a-z0-9]+$/i)?.[0] ?? `.${file.type.split('/')[1] || 'png'}`).toLowerCase();
 						return new File([file], `${stamp}-${++count}${ext}`, { type: file.type });
 					});
+					renamed.forEach((file) => previews.set(file.name, URL.createObjectURL(file)));
 					const list = new DataTransfer();
 					renamed.forEach((file) => list.items.add(file));
 					upload.files = list.files;
