@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import Avatar from '../components/Avatar.astro';
 import Icon from '../components/Icon.astro';
 import { ADSENSE_CLIENT, AUTHOR, GITHUB_URL, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 import { categoryInfo, getPosts, groupCategories, url } from '../lib/posts';
@@ -120,7 +121,7 @@ const sidebarGroups = groupCategories(await getPosts());
 						<Icon name="x" size={18} />
 					</button>
 					<a class="sb-profile" href={url('/about/')}>
-						<img src={`${GITHUB_URL}.png?size=96`} alt="" width="40" height="40" />
+						<Avatar size={40} />
 						<div>
 							<strong>{AUTHOR}</strong>
 							<span>개발 · 보안 기록</span>

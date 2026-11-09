@@ -1,0 +1,27 @@
+---
+/**
+ * The GitHub profile picture, downloaded at build time and served from the blog as WebP
+ * (1x and 2x), instead of every visitor going through github.com's uncached redirect.
+ * A new picture on GitHub shows up with the next deploy.
+ */
+import { Image } from 'astro:assets';
+import { GITHUB_URL } from '../consts';
+
+interface Props {
+	/** Shown size in CSS pixels. */
+	size: number;
+	class?: string;
+}
+
+const { size, class: className } = Astro.props;
+---
+
+<Image
+	src={`${GITHUB_URL}.png?size=192`}
+	alt=""
+	width={size}
+	height={size}
+	densities={[1, 2]}
+	loading="eager"
+	class={className}
+/>

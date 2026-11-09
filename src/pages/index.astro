@@ -1,4 +1,5 @@
 ---
+import Avatar from '../components/Avatar.astro';
 import CategoryGroups from '../components/CategoryGroups.astro';
 import Heatmap from '../components/Heatmap.astro';
 import Icon from '../components/Icon.astro';
@@ -12,7 +13,7 @@ const recent = posts.slice(0, 6);
 
 <Base>
 	<section class="hero">
-		<img class="avatar" src={`${GITHUB_URL}.png?size=192`} alt="" width="96" height="96" />
+		<Avatar class="avatar" size={96} />
 		<div>
 			<h1>{AUTHOR}</h1>
 			<p>{SITE_DESCRIPTION}</p>
