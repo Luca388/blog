@@ -11,8 +11,6 @@ backend:
     uploadMedia: "{{path}} 업로드"
     deleteMedia: "{{path}} 삭제"
 
-locale: ko
-
 # Look: name and logo on the sign-in page and header, and the "view site" link.
 app_title: "Luca's development diary · 글쓰기"
 logo:
@@ -88,6 +86,16 @@ collections:
           - { name: demo, label: "데모 URL", widget: string, required: false }
           - { name: stack, label: "기술 스택", widget: list, required: false }
           - { name: period, label: "기간", widget: string, required: false, hint: "예: 2026.09 ~ 2026.10" }
+      # Markdown mode has no upload, so photos are uploaded here; on save, the script in
+      # index.html puts each one into an empty `![]()` in the body (or at the end) and drops this field.
+      - &f_photos
+        name: photos
+        label: 사진 올리기
+        widget: image
+        multiple: true
+        required: false
+        preview: false
+        hint: "본문에서 사진 넣을 자리에 이미지 버튼으로 `![]()`를 넣고 여기에 사진을 올리면, 저장할 때 순서대로 채워져요. 빈 자리가 없으면 글 끝에 붙어요."
       - &f_body
         name: body
         label: 본문
@@ -131,6 +139,7 @@ collections:
           - { name: difficulty, label: "난이도", widget: string, required: false }
           - { name: solved, label: "푼 날짜", widget: datetime, required: false, time_format: false, format: "YYYY-MM-DD" }
           - { name: link, label: "문제 링크", widget: string, required: false }
+      - *f_photos
       - *f_body
       - *f_draft
   - name: bugbounty
@@ -163,6 +172,7 @@ collections:
           - { name: status, label: "상태", widget: select, required: false, options: [제보, 확인, 패치, 공개] }
           - { name: reported, label: "제보일", widget: datetime, required: false, time_format: false, format: "YYYY-MM-DD" }
           - { name: link, label: "공개 리포트 / CVE 링크", widget: string, required: false }
+      - *f_photos
       - *f_body
       - *f_draft
   - name: docs
@@ -183,6 +193,7 @@ collections:
     fields: &fields
       - *f_title
       - *f_tags
+      - *f_photos
       - *f_body
       - *f_draft
   - name: papers
@@ -212,6 +223,7 @@ collections:
           - { name: venue, label: "학회 / 행사", widget: string, required: false }
           - { name: authors, label: "저자 / 발표자", widget: string, required: false }
           - { name: link, label: "원문 링크", widget: string, required: false }
+      - *f_photos
       - *f_body
       - *f_draft
   - name: contests
@@ -242,6 +254,7 @@ collections:
           - { name: organizer, label: "주최", widget: string, required: false }
           - { name: result, label: "결과", widget: string, required: false, hint: "합격, 수상, 준비 중 등" }
           - { name: date, label: "날짜", widget: datetime, required: false, time_format: false, format: "YYYY-MM-DD" }
+      - *f_photos
       - *f_body
       - *f_draft
 

@@ -27,6 +27,25 @@
 		<script>
 			// The preview pane uses the blog's post look (preview.css next to this file).
 			CMS.registerPreviewStyle('preview.css');
+
+			// Photos uploaded in the "사진 올리기" field go into the body on save: each fills the next
+			// empty `![]()` (what the image button inserts in Markdown mode), or goes at the end.
+			// The field itself is not saved.
+			CMS.registerEventListener({
+				name: 'preSave',
+				handler: ({ entry }) => {
+					const data = entry.get('data');
+					const value = data.get('photos');
+					const photos = (value?.toJS ? value.toJS() : (value ?? [])).filter(Boolean);
+					let body = data.get('body') ?? '';
+					for (const src of photos) {
+						if (body.includes(`](${src})`)) continue;
+						if (body.includes('![]()')) body = body.replace('![]()', `![](${src})`);
+						else body = `${body.trimEnd()}\n\n![](${src})\n`;
+					}
+					return data.set('body', body).delete('photos');
+				},
+			});
 		</script>
 	</body>
 </html>
