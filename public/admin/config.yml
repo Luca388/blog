@@ -86,8 +86,8 @@ collections:
           - { name: demo, label: "데모 URL", widget: string, required: false }
           - { name: stack, label: "기술 스택", widget: list, required: false }
           - { name: period, label: "기간", widget: string, required: false, hint: "예: 2026.09 ~ 2026.10" }
-      # Markdown mode has no upload, so photos are uploaded here; on save, the script in
-      # index.html puts each one into an empty `![]()` in the body (or at the end) and drops this field.
+      # Markdown mode has no upload, so photos are uploaded here: images dragged or pasted into the
+      # body come here (script in index.html), and on save this field is dropped from the post.
       - &f_photos
         name: photos
         label: 사진 올리기
@@ -95,7 +95,7 @@ collections:
         multiple: true
         required: false
         preview: false
-        hint: "본문에서 사진 넣을 자리에 이미지 버튼으로 `![]()`를 넣고 여기에 사진을 올리면, 저장할 때 순서대로 채워져요. 빈 자리가 없으면 글 끝에 붙어요."
+        hint: "본문에 사진을 끌어다 놓거나 붙여넣으면 여기로 올라가고 커서 자리에 링크가 들어가요. 여기에 직접 올린 사진은 저장할 때 본문의 빈 `![]()`를 순서대로 채워요(없으면 글 끝)."
       - &f_body
         name: body
         label: 본문

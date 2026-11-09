@@ -46,6 +46,64 @@
 					return data.set('body', body).delete('photos');
 				},
 			});
+
+			// Dragging or pasting images into the body in Markdown mode (a plain textarea, which has no
+			// upload of its own): each image is renamed to a date-time name, handed to the "사진 올리기"
+			// field to upload, and its final link goes in at the cursor.
+			(() => {
+				const bodyBox = (target) => target?.closest?.('section[data-key-path="body"]') && target.tagName === 'TEXTAREA' ? target : null;
+				const imagesOf = (list) => [...(list ?? [])].filter((file) => file.type.startsWith('image/'));
+				const pad = (n, width = 2) => String(n).padStart(width, '0');
+				let count = 0;
+
+				function insert(textarea, files) {
+					const upload = document.querySelector('section[data-key-path="photos"] input[type="file"]');
+					if (!upload) return false;
+					const now = new Date();
+					const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+					const renamed = files.map((file) => {
+						const ext = (file.name.match(/\.[a-z0-9]+$/i)?.[0] ?? `.${file.type.split('/')[1] || 'png'}`).toLowerCase();
+						return new File([file], `${stamp}-${++count}${ext}`, { type: file.type });
+					});
+					const list = new DataTransfer();
+					renamed.forEach((file) => list.items.add(file));
+					upload.files = list.files;
+					upload.dispatchEvent(new Event('change', { bubbles: true }));
+					// each link on a line of its own
+					const before = textarea.value.slice(0, textarea.selectionStart);
+					const after = textarea.value.slice(textarea.selectionEnd);
+					const links =
+						(before && !before.endsWith('\n') ? '\n\n' : '') +
+						renamed.map((file) => `![](../images/${file.name})`).join('\n\n') +
+						(after && !after.startsWith('\n') ? '\n\n' : '');
+					textarea.focus();
+					// insertText keeps the browser's undo and tells the editor the text changed
+					if (!document.execCommand('insertText', false, links)) {
+						textarea.setRangeText(links, textarea.selectionStart, textarea.selectionEnd, 'end');
+						textarea.dispatchEvent(new Event('input', { bubbles: true }));
+					}
+					return true;
+				}
+
+				document.addEventListener('paste', (event) => {
+					const textarea = bodyBox(event.target);
+					const files = imagesOf(event.clipboardData?.files);
+					if (textarea && files.length && insert(textarea, files)) event.preventDefault();
+				}, true);
+				document.addEventListener('dragover', (event) => {
+					if (bodyBox(event.target) && [...(event.dataTransfer?.types ?? [])].includes('Files')) event.preventDefault();
+				}, true);
+				document.addEventListener('drop', (event) => {
+					const textarea = bodyBox(event.target);
+					const files = imagesOf(event.dataTransfer?.files);
+					if (!textarea || !files.length) return;
+					event.preventDefault();
+					// put the cursor where the image was dropped, where the browser can tell
+					const spot = document.caretPositionFromPoint?.(event.clientX, event.clientY);
+					if (spot?.offsetNode === textarea) textarea.setSelectionRange(spot.offset, spot.offset);
+					insert(textarea, files);
+				}, true);
+			})();
 		</script>
 	</body>
 </html>
