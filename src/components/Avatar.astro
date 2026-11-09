@@ -1,11 +1,12 @@
 ---
 /**
- * The GitHub profile picture, downloaded at build time and served from the blog as WebP
- * (1x and 2x), instead of every visitor going through github.com's uncached redirect.
- * A new picture on GitHub shows up with the next deploy.
+ * The GitHub profile picture, served from the blog as WebP (1x and 2x) instead of every
+ * visitor going through github.com/<user>.png, an uncached and sometimes very slow redirect.
+ * The picture is src/assets/avatar.jpg; each deploy first tries to refresh it from GitHub
+ * (.github/workflows/deploy.yml) and keeps the saved one if that fails.
  */
 import { Image } from 'astro:assets';
-import { GITHUB_URL } from '../consts';
+import avatar from '../assets/avatar.jpg';
 
 interface Props {
 	/** Shown size in CSS pixels. */
@@ -16,12 +17,4 @@ interface Props {
 const { size, class: className } = Astro.props;
 ---
 
-<Image
-	src={`${GITHUB_URL}.png?size=192`}
-	alt=""
-	width={size}
-	height={size}
-	densities={[1, 2]}
-	loading="eager"
-	class={className}
-/>
+<Image src={avatar} alt="" width={size} height={size} densities={[1, 2]} loading="eager" class={className} />

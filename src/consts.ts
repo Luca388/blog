@@ -1,7 +1,7 @@
 export const SITE_TITLE = "Luca's development diary";
 export const SITE_DESCRIPTION = '개발과 보안을 공부하며 배운 것들을 차곡차곡 정리하는 기록';
 export const GITHUB_URL = 'https://github.com/Luca388';
-/** Name on the home page profile; the photo is the GitHub profile picture. */
+/** Name on the home page profile; the photo is the GitHub profile picture (src/assets/avatar.jpg). */
 export const AUTHOR = 'Luca';
 
 /**

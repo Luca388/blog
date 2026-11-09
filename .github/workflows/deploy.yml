@@ -26,6 +26,14 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Refresh the GitHub profile picture (account id 121554470); on any failure the saved one stays.
+      - name: Refresh profile picture
+        run: |
+          if curl -fsSL --max-time 20 "https://avatars.githubusercontent.com/u/121554470?v=4&s=192" -o "$RUNNER_TEMP/avatar"; then
+            mv "$RUNNER_TEMP/avatar" src/assets/avatar.jpg
+          else
+            echo "::warning::Could not download the profile picture; using the saved one"
+          fi
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
