@@ -22,6 +22,7 @@ export const CATEGORIES: Record<string, string> = {
 	Language: 'Language',
 	Algorithm: 'Algorithm',
 	Math: 'Math',
+	AI: 'AI',
 };
 
 /** The two groups categories are shown in, on the home and category pages. */
@@ -93,6 +94,12 @@ export const CATEGORY_INFO: Record<string, CategoryInfo> = {
 	Language: { group: 'study', icon: 'terminal', description: 'C, 어셈블리, 개발 환경' },
 	Algorithm: { group: 'study', icon: 'tree', description: '자료구조와 알고리즘 문제 풀이' },
 	Math: { group: 'study', icon: 'sigma', description: '대수, 정수론 등 수학 정리' },
+	AI: {
+		group: 'study',
+		icon: 'sparkles',
+		description: '머신러닝, 딥러닝, LLM 공부 정리',
+		plans: ['머신러닝 · 딥러닝 기초 개념', 'LLM 동작 원리와 활용', 'AI 보안 (프롬프트 인젝션 등)'],
+	},
 };
 
 /** Google AdSense publisher ID (`ca-pub-...`). Ads and the account meta tag are only added when set. */
