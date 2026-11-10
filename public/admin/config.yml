@@ -76,7 +76,8 @@ collections:
         label: 태그
         widget: list
         required: false
-      - name: project
+      - &f_project
+        name: project
         label: "프로젝트 정보 (글 위에 요약 박스로 표시)"
         widget: object
         required: false
@@ -127,7 +128,8 @@ collections:
     fields:
       - *f_title
       - *f_tags
-      - name: ctf
+      - &f_ctf
+        name: ctf
         label: "문제 정보 (글 위에 요약 박스로 표시)"
         widget: object
         required: false
@@ -159,7 +161,8 @@ collections:
     fields:
       - *f_title
       - *f_tags
-      - name: bugbounty
+      - &f_bugbounty
+        name: bugbounty
         label: "제보 정보 (글 위에 요약 박스로 표시)"
         widget: object
         required: false
@@ -213,7 +216,8 @@ collections:
     fields:
       - *f_title
       - *f_tags
-      - name: paper
+      - &f_paper
+        name: paper
         label: "논문/발표 정보 (글 위에 요약 박스로 표시)"
         widget: object
         required: false
@@ -243,7 +247,8 @@ collections:
     fields:
       - *f_title
       - *f_tags
-      - name: achievement
+      - &f_achievement
+        name: achievement
         label: "공모전/자격증 정보 (글 위에 요약 박스로 표시)"
         widget: object
         required: false
@@ -267,3 +272,35 @@ collections:
   - { name: algorithm, label: Algorithm, description: "자료구조와 알고리즘 문제 풀이", icon: account_tree, folder: posts/Algorithm, create: true, slug: *slug, summary: *summary, sortable_fields: *sort, view_filters: *filters, view_groups: *groups, media_folder: ../images, public_folder: ../images, fields: *fields }
   - { name: math, label: Math, description: "대수, 정수론 등 수학 정리", icon: functions, folder: posts/Math, create: true, slug: *slug, summary: *summary, sortable_fields: *sort, view_filters: *filters, view_groups: *groups, media_folder: ../images, public_folder: ../images, fields: *fields }
   - { name: ai, label: AI, description: "머신러닝, 딥러닝, LLM 공부 정리", icon: auto_awesome, folder: posts/AI, create: true, slug: *slug, summary: *summary, sortable_fields: *sort, view_filters: *filters, view_groups: *groups, media_folder: ../images, public_folder: ../images, fields: *fields }
+
+  # ── 임시 저장 ────────────────────────────────────────────────────────
+  # Drafts from every category in one list. It reads posts/<category>/<file>.md, shows only
+  # `draft: true`, and knows every category's extra-info fields so saving from here keeps them.
+  # New posts are still written in their category.
+  - divider: true
+  - name: drafts
+    label: 임시 저장
+    description: "모든 카테고리의 임시 저장한 글 (사이트에 안 보임). 새 글은 각 카테고리에서 써요."
+    icon: edit_note
+    folder: posts
+    # one folder down: posts/<category>/<file>.md
+    nested: { depth: 2 }
+    filter: { field: draft, value: true }
+    create: false
+    delete: false
+    duplicate: false
+    summary: "{{title}} `{{dirname}}`"
+    sortable_fields: *sort
+    media_folder: ../images
+    public_folder: ../images
+    fields:
+      - *f_title
+      - *f_tags
+      - *f_project
+      - *f_ctf
+      - *f_bugbounty
+      - *f_paper
+      - *f_achievement
+      - *f_photos
+      - *f_body
+      - *f_draft
