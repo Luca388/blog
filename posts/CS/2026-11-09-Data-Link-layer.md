@@ -1,4 +1,6 @@
 ---
+tags:
+  - 데이터통신
 draft: false
 ---
 
