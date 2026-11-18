@@ -2,6 +2,7 @@
 import { render } from 'astro:content';
 import katex from 'katex';
 import { latexDelimiters } from '../lib/markdown-fixes.mjs';
+import Icon from '../components/Icon.astro';
 import PostMeta from '../components/PostMeta.astro';
 import Base from '../layouts/Base.astro';
 import {
@@ -78,6 +79,36 @@ const KATEX_CSS = `https://cdn.jsdelivr.net/npm/katex@${katex.version}/dist/kate
 			)
 		}
 
+		{
+			/* the same contents, following the scroll once the TOC above is out of view:
+			   a column right of the post on wide windows, a button at the bottom right otherwise */
+			toc.length > 2 && (
+				<div class="toc-rail">
+					<nav class="toc-float" aria-label="목차" data-toc-float>
+						<button
+							class="icon-btn toc-float-toggle"
+							type="button"
+							aria-expanded="false"
+							aria-controls="toc-float-panel"
+							aria-label="목차 열기/닫기"
+						>
+							<Icon name="list" size={18} />
+						</button>
+						<div class="toc-float-panel" id="toc-float-panel">
+							<p class="toc-float-title">목차</p>
+							<ul>
+								{toc.map((h) => (
+									<li class={`depth-${h.depth}`}>
+										<a href={`#${h.slug}`}>{h.text}</a>
+									</li>
+								))}
+							</ul>
+						</div>
+					</nav>
+				</div>
+			)
+		}
+
 		<div class:list={['prose', { 'title-from-body': post.data.titleFromBody }]} data-pagefind-body>
 			<Content />
 		</div>
@@ -118,3 +149,120 @@ const KATEX_CSS = `https://cdn.jsdelivr.net/npm/katex@${katex.version}/dist/kate
 		</nav>
 	</article>
 </Base>
+
+<script>
+	// Copy button on every code block. The <pre> scrolls sideways, so it goes in a wrapper
+	// and the button sits on the wrapper instead of scrolling away with the code.
+	const ICON_COPY =
+		'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+	const ICON_CHECK =
+		'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+
+	const copyText = async (text: string) => {
+		try {
+			await navigator.clipboard.writeText(text);
+		} catch {
+			// clipboard API is missing on non-https pages and some older browsers
+			const area = document.createElement('textarea');
+			area.value = text;
+			area.style.cssText = 'position:fixed;opacity:0';
+			document.body.append(area);
+			area.select();
+			document.execCommand('copy');
+			area.remove();
+		}
+	};
+
+	document.querySelectorAll<HTMLPreElement>('.prose pre').forEach((pre) => {
+		const wrap = document.createElement('div');
+		wrap.className = 'code-block';
+		pre.before(wrap);
+		wrap.append(pre);
+
+		const btn = document.createElement('button');
+		btn.type = 'button';
+		btn.className = 'copy-btn';
+		btn.setAttribute('aria-label', '코드 복사');
+		const idle = `${ICON_COPY}<span>복사</span>`;
+		btn.innerHTML = idle;
+		let timer: ReturnType<typeof setTimeout>;
+		btn.addEventListener('click', async () => {
+			await copyText((pre.querySelector('code') ?? pre).textContent ?? '');
+			btn.innerHTML = `${ICON_CHECK}<span>복사됨</span>`;
+			btn.dataset.copied = '';
+			clearTimeout(timer);
+			timer = setTimeout(() => {
+				btn.innerHTML = idle;
+				delete btn.dataset.copied;
+			}, 1500);
+		});
+		wrap.append(btn);
+	});
+
+	// Floating TOC: shown once the TOC at the top of the post has scrolled out of view.
+	const float = document.querySelector<HTMLElement>('[data-toc-float]');
+	const inlineToc = document.querySelector<HTMLElement>('.toc');
+	const post = document.querySelector<HTMLElement>('.post');
+	if (float && inlineToc && post) {
+		const root = document.documentElement;
+		const toggle = float.querySelector<HTMLButtonElement>('.toc-float-toggle')!;
+		const links = [...float.querySelectorAll<HTMLAnchorElement>('a')];
+		const targets = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))));
+
+		// a column right of the post when there is room for it, a corner button otherwise
+		const SIDE_ROOM = 40 + 220 + 16;
+		const layout = () => {
+			const side = innerWidth - post.getBoundingClientRect().right >= SIDE_ROOM;
+			root.dataset.tocMode = side ? 'side' : 'compact';
+			if (side) setOpen(false);
+		};
+
+		const setOpen = (open: boolean) => {
+			if (open) float.dataset.open = '';
+			else delete float.dataset.open;
+			toggle.setAttribute('aria-expanded', String(open));
+		};
+		toggle.addEventListener('click', () => setOpen(!('open' in float.dataset)));
+		document.addEventListener('click', (e) => {
+			if (!float.contains(e.target as Node)) setOpen(false);
+		});
+		document.addEventListener('keydown', (e) => e.key === 'Escape' && setOpen(false));
+		links.forEach((a) => a.addEventListener('click', () => setOpen(false)));
+
+		// highlight the section being read: the last heading above the top fifth of the window
+		let active: HTMLAnchorElement | undefined;
+		const update = () => {
+			if (inlineToc.getBoundingClientRect().bottom < 0) root.dataset.tocFloat = '';
+			else {
+				delete root.dataset.tocFloat;
+				setOpen(false);
+			}
+			const line = innerHeight / 5;
+			let current = -1;
+			targets.forEach((el, i) => {
+				if (el && el.getBoundingClientRect().top <= line) current = i;
+			});
+			const next = links[current];
+			if (next === active) return;
+			active?.removeAttribute('aria-current');
+			next?.setAttribute('aria-current', 'location');
+			active = next;
+			// keep the highlighted entry visible in a long list
+			// (scrolls only the TOC column; scrollIntoView would move the page too)
+			if (next && root.dataset.tocMode === 'side') {
+				const r = next.getBoundingClientRect();
+				const box = float.getBoundingClientRect();
+				if (r.top < box.top) float.scrollTop -= box.top - r.top + 8;
+				else if (r.bottom > box.bottom) float.scrollTop += r.bottom - box.bottom + 8;
+			}
+		};
+
+		// (scroll events already arrive at most once per frame)
+		addEventListener('scroll', update, { passive: true });
+		addEventListener('resize', layout);
+		// the post also moves when the sidebar column opens or closes
+		new ResizeObserver(layout).observe(document.querySelector('.content') ?? post);
+		layout();
+		update();
+	}
+</script>
